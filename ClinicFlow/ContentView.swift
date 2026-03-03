@@ -8,17 +8,23 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isLoggedIn = false
+    
+    init() {
+        // Check if user should stay signed in
+        let staySignedIn = UserDefaults.standard.bool(forKey: "staySignedIn")
+        _isLoggedIn = State(initialValue: staySignedIn)
+    }
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            Group {
+                LoginView(isLoggedIn: $isLoggedIn)
+                    .transition(.move(edge: .leading))
+            }
+            .animation(.easeInOut(duration: 0.3), value: isLoggedIn)
         }
-        .padding()
     }
 }
 
-#Preview {
-    ContentView()
-}
+
