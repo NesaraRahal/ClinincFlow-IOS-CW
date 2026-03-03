@@ -9,8 +9,9 @@
 //  LoginView.swift
 //  ClinicFlow
 //
-//  Created by COBSCCOMP242P-052 on 2026-02-23.
+//  Updated by COBSCCOMP242P-052 on 2026-02-23.
 //
+
 
 import SwiftUI
 
@@ -296,7 +297,16 @@ struct LoginView: View {
                     .padding(.bottom, 28)
             }
         }
-        
+        .navigationDestination(isPresented: $showOTPView) {
+            OTPVerificationView(
+                isLoggedIn: $isLoggedIn,
+                staySignedIn: $staySignedIn,
+                phoneNumber: phoneNumber,
+                isFirstTimeUser: isFirstTimeUser
+            )
+        }
+
+        .ignoresSafeArea(.keyboard)
     }
 }
 
