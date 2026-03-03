@@ -19,8 +19,13 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Group {
-                LoginView(isLoggedIn: $isLoggedIn)
-                    .transition(.move(edge: .leading))
+                if isLoggedIn {
+                    MainTabView(isLoggedIn: $isLoggedIn)
+                        .transition(.move(edge: .trailing))
+                } else {
+                    LoginView(isLoggedIn: $isLoggedIn)
+                        .transition(.move(edge: .leading))
+                }
             }
             .animation(.easeInOut(duration: 0.3), value: isLoggedIn)
         }
