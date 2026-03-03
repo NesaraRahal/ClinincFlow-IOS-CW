@@ -296,7 +296,21 @@ struct LoginView: View {
                     .padding(.bottom, 28)
             }
         }
-        
+        .navigationDestination(isPresented: $showOTPView) {
+            OTPVerificationView(
+                isLoggedIn: $isLoggedIn,
+                staySignedIn: $staySignedIn,
+                phoneNumber: phoneNumber,
+                isFirstTimeUser: isFirstTimeUser
+            )
+        }
+        .sheet(isPresented: $showAppleSignIn) {
+            AppleSignInView(isLoggedIn: $isLoggedIn, staySignedIn: $staySignedIn)
+        }
+        .sheet(isPresented: $showGoogleSignIn) {
+            GoogleSignInView(isLoggedIn: $isLoggedIn, staySignedIn: $staySignedIn)
+        }
+        .ignoresSafeArea(.keyboard)
     }
 }
 
