@@ -9,28 +9,15 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab: Tab = .home
-    @EnvironmentObject var hapticsManager: HapticsManager
 
     @Binding var isLoggedIn: Bool
-    
-    // All active appointments across all profiles
-    @State private var allActiveAppointments: [AppointmentData] = []
-    
-    // Appointments filtered for the current active profile
-    private var profileAppointments: [AppointmentData] {
-        let name = activeProfileManager.activeProfile.patientName(
-            profileManager: profileManager,
-            familyManager: familyManager
-        )
-        return allActiveAppointments.filter { $0.patientName == name }
-    }
-    
+
     enum Tab: String, CaseIterable {
         case home = "Home"
         case map = "Map"
         case visits = "Visits"
         case settings = "Settings"
-        
+
         var icon: String {
             switch self {
             case .home: return "house.fill"
@@ -39,7 +26,7 @@ struct MainTabView: View {
             case .settings: return "gearshape.fill"
             }
         }
-        
+
         var iconUnselected: String {
             switch self {
             case .home: return "house"
@@ -49,65 +36,36 @@ struct MainTabView: View {
             }
         }
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             // Tab Content
             Group {
                 switch selectedTab {
                 case .home:
-                    if !profileAppointments.isEmpty {
-                        PatientHomeView(
-                            appointment: profileAppointments.first!,
-                            onCancelAppointment: {
-                                if let appt = profileAppointments.first {
-                                    withAnimation(.spring()) {
-                                        visitsManager.cancelVisitByToken(appt.tokenNumber)
-                                        allActiveAppointments.removeAll { $0.tokenNumber == appt.tokenNumber }
-                                    }
-                                }
-                            }
-                        )
-                    } else {
-                        EmptyHomeView(onAppointmentBooked: { data in
-                            withAnimation(.spring()) {
-                                // Auto-set the active profile's patient name
-                                var bookingData = data
-                                bookingData.patientName = activeProfileManager.activeProfile.patientName(
-                                    profileManager: profileManager,
-                                    familyManager: familyManager
-                                )
-                                allActiveAppointments.append(bookingData)
-                                visitsManager.addVisit(from: bookingData)
-                            }
-                        })
-                    }
-
+                    EmptyHomeView()
+                case .map:
+                    Text("Map")
+                case .visits:
+                    Text("Visits")
+                case .settings:
+                    Text("Settings")
                 }
             }
-            
+
             // Custom Tab Bar
             CustomTabBar(selectedTab: $selectedTab)
         }
         .ignoresSafeArea(.keyboard)
-        .onChange(of: selectedTab) { _, newTab in
-            hapticsManager.playNavigationSound()
-            hapticsManager.speak("\(newTab.rawValue) tab selected")
-        }
-        .onChange(of: visitsManager.visits) { _, _ in
-            // Sync: remove appointments whose visits were cancelled/completed
-            let activeTokens = Set(visitsManager.visits.filter { $0.status == .active }.map { $0.tokenNumber })
-            allActiveAppointments.removeAll { !activeTokens.contains($0.tokenNumber) }
-        }
+
     }
 }
 
 // MARK: - Custom Tab Bar (Liquid Glass Style)
 struct CustomTabBar: View {
     @Binding var selectedTab: MainTabView.Tab
-    @EnvironmentObject var hapticsManager: HapticsManager
     @Namespace private var animation
-    
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(MainTabView.Tab.allCases, id: \.self) { tab in
@@ -116,7 +74,6 @@ struct CustomTabBar: View {
                     isSelected: selectedTab == tab,
                     animation: animation
                 ) {
-                    hapticsManager.playNavigationSound()
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         selectedTab = tab
                     }
@@ -157,7 +114,7 @@ struct TabBarButton: View {
     let isSelected: Bool
     let animation: Namespace.ID
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             VStack(spacing: 4) {
@@ -168,13 +125,13 @@ struct TabBarButton: View {
                             .frame(width: 56, height: 32)
                             .matchedGeometryEffect(id: "TAB_BG", in: animation)
                     }
-                    
+
                     Image(systemName: isSelected ? tab.icon : tab.iconUnselected)
                         .font(.system(size: 20, weight: isSelected ? .semibold : .regular))
                         .foregroundColor(isSelected ? Color(hex: "16A34A") : .secondary)
                 }
                 .frame(height: 32)
-                
+
                 Text(tab.rawValue)
                     .font(.system(size: 10, weight: isSelected ? .semibold : .medium))
                     .foregroundColor(isSelected ? Color(hex: "16A34A") : .secondary)
@@ -184,5 +141,3 @@ struct TabBarButton: View {
         .buttonStyle(.plain)
     }
 }
-
-

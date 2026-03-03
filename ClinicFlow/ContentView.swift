@@ -32,12 +32,4 @@ struct ContentView: View {
     }
 }
 
-//#Preview {
-//    ContentView()
-//        .environmentObject(UserProfileManager())
-//        .environmentObject(AppearanceManager())
-//        .environmentObject(VisitsManager())
-//        .environmentObject(FamilyMembersManager())
-//        .environmentObject(HapticsManager())
-//        .environmentObject(ActiveProfileManager())
-}
+
