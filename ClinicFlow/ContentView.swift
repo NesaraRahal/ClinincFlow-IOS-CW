@@ -18,32 +18,19 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            Group {
-                if isLoggedIn {
-                    MainTabView(isLoggedIn: $isLoggedIn)
-                        .transition(.move(edge: .trailing))
-                } else {
-                    LoginView(isLoggedIn: $isLoggedIn, showProfileSwitcher: $showProfileSwitcher)
-                        .transition(.move(edge: .leading))
-                }
-            }
-            .animation(.easeInOut(duration: 0.3), value: isLoggedIn)
-            .sheet(isPresented: $showProfileSwitcher) {
+        Group {
+            if isLoggedIn {
+                HomeView(isLoggedIn: $isLoggedIn, showProfileSwitcher: $showProfileSwitcher)
+                    .transition(.move(edge: .trailing))
+            } else {
                 NavigationStack {
-                    ProfileSwitcherView()
+                    LoginView(isLoggedIn: $isLoggedIn, showProfileSwitcher: $showProfileSwitcher)
                 }
+                .transition(.move(edge: .leading))
             }
         }
+        .animation(.easeInOut(duration: 0.35), value: isLoggedIn)
     }
 }
 
-#Preview {
-    ContentView()
-        .environmentObject(UserProfileManager())
-        .environmentObject(AppearanceManager())
-        .environmentObject(VisitsManager())
-        .environmentObject(FamilyMembersManager())
-        .environmentObject(HapticsManager())
-        .environmentObject(ActiveProfileManager())
-}
+
