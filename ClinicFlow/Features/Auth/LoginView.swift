@@ -133,15 +133,15 @@ struct LoginView: View {
                             RoundedRectangle(cornerRadius: 14)
                                 .stroke(
                                     showPhoneError
-                                    ? Color.red.opacity(0.6)
-                                    : (isPhoneFieldFocused ? Color(hex: "16A34A").opacity(0.4) : Color(.systemGray5)),
+                                        ? Color.red.opacity(0.6)
+                                        : (isPhoneFieldFocused ? Color(hex: "16A34A").opacity(0.4) : Color(.systemGray5)),
                                     lineWidth: showPhoneError ? 2 : (isPhoneFieldFocused ? 2 : 1)
                                 )
                         }
                         .shadow(
                             color: showPhoneError
-                            ? Color.red.opacity(0.15)
-                            : (isPhoneFieldFocused ? Color(hex: "16A34A").opacity(0.12) : Color.black.opacity(0.03)),
+                                ? Color.red.opacity(0.15)
+                                : (isPhoneFieldFocused ? Color(hex: "16A34A").opacity(0.12) : Color.black.opacity(0.03)),
                             radius: 8,
                             x: 0,
                             y: 3
@@ -187,16 +187,16 @@ struct LoginView: View {
                         .frame(height: 52)
                         .background(
                             isPhoneValid
-                            ? LinearGradient(
-                                colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                            : LinearGradient(
-                                colors: [Color(.systemGray4), Color(.systemGray4)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
+                                ? LinearGradient(
+                                    colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                                : LinearGradient(
+                                    colors: [Color(.systemGray4), Color(.systemGray4)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .shadow(
@@ -206,13 +206,6 @@ struct LoginView: View {
                             y: 5
                         )
                         .animation(.spring(response: 0.3), value: isPhoneValid)
-                    }
-                    .sheet(isPresented: $showOTPView) {
-                        OTPVerificationView(
-                            phoneNumber: phoneNumber,
-                            isLoggedIn: $isLoggedIn,
-                            isPresented: $showOTPView
-                        )
                     }
                 }
                 .padding(20)
@@ -241,9 +234,8 @@ struct LoginView: View {
                 
                 // Social Buttons - Compact
                 HStack(spacing: 12) {
-                    Button(action: {
-                        // Apple Sign In — wire up AuthenticationServices when ready
-                        isLoggedIn = true
+                    Button(action: { 
+                        showAppleSignIn = true
                     }) {
                         HStack(spacing: 10) {
                             Image(systemName: "apple.logo")
@@ -263,9 +255,8 @@ struct LoginView: View {
                         .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 3)
                     }
                     
-                    Button(action: {
-                        // Google Sign In — wire up GoogleSignIn SDK when ready
-                        isLoggedIn = true
+                    Button(action: { 
+                        showGoogleSignIn = true
                     }) {
                         HStack(spacing: 10) {
                             Text("G")
@@ -299,97 +290,53 @@ struct LoginView: View {
                     .padding(.bottom, 28)
             }
         }
+        .navigationDestination(isPresented: $showOTPView) {
+            OTPVerificationView(
+                isLoggedIn: $isLoggedIn,
+                showProfileSwitcher: $showProfileSwitcher,
+                staySignedIn: $staySignedIn,
+                phoneNumber: phoneNumber,
+                isFirstTimeUser: isFirstTimeUser
+            )
+        }
+        .sheet(isPresented: $showAppleSignIn) {
+            AppleSignInView(isLoggedIn: $isLoggedIn, showProfileSwitcher: $showProfileSwitcher, staySignedIn: $staySignedIn)
+        }
+        .sheet(isPresented: $showGoogleSignIn) {
+            GoogleSignInView(isLoggedIn: $isLoggedIn, showProfileSwitcher: $showProfileSwitcher, staySignedIn: $staySignedIn)
+        }
+        .ignoresSafeArea(.keyboard)
     }
 }
 
+// Color extension to support hex colors
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
 
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+}
 
 #Preview {
     LoginView(isLoggedIn: .constant(false), showProfileSwitcher: .constant(false))
-}
-
-// MARK: - OTP Verification View
-struct OTPVerificationView: View {
-    let phoneNumber: String
-    @Binding var isLoggedIn: Bool
-    @Binding var isPresented: Bool
-
-    @State private var otpCode: String = ""
-    @FocusState private var isOTPFocused: Bool
-
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 32) {
-                Spacer()
-
-                VStack(spacing: 12) {
-                    Image(systemName: "message.badge.filled.fill")
-                        .font(.system(size: 52))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-
-                    Text("Verify your number")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-
-                    Text("Enter the 6-digit code sent to\n\(phoneNumber)")
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
-
-                TextField("Enter OTP", text: $otpCode)
-                    .keyboardType(.numberPad)
-                    .focused($isOTPFocused)
-                    .font(.system(size: 28, weight: .bold, design: .monospaced))
-                    .multilineTextAlignment(.center)
-                    .frame(height: 60)
-                    .padding(.horizontal, 24)
-                    .onChange(of: otpCode) { _, value in
-                        if value.count > 6 {
-                            otpCode = String(value.prefix(6))
-                        }
-                    }
-
-                Button(action: {
-                    // Accept any 6-digit code; replace with real backend verification
-                    if otpCode.count == 6 {
-                        isPresented = false
-                        isLoggedIn = true
-                    }
-                }) {
-                    Text("Verify & Continue")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(
-                            otpCode.count == 6
-                            ? LinearGradient(colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
-                                             startPoint: .leading, endPoint: .trailing)
-                            : LinearGradient(colors: [Color(.systemGray4), Color(.systemGray4)],
-                                             startPoint: .leading, endPoint: .trailing)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
-                .disabled(otpCode.count < 6)
-                .padding(.horizontal, 24)
-                .animation(.spring(response: 0.3), value: otpCode.count)
-
-                Spacer()
-            }
-            .navigationTitle("OTP Verification")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Back") { isPresented = false }
-                }
-            }
-            .onAppear { isOTPFocused = true }
-        }
-    }
 }
