@@ -20,7 +20,7 @@ struct ContentView: View {
     var body: some View {
         Group {
             if isLoggedIn {
-                HomeView(isLoggedIn: $isLoggedIn, showProfileSwitcher: $showProfileSwitcher)
+                EmptyHomeView()
                     .transition(.move(edge: .trailing))
             } else {
                 NavigationStack {
