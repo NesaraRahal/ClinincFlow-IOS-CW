@@ -6,63 +6,20 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXContainerItemProxy section */
-		03C9B5872F56CB98004DE68A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03C9B5712F56CB97004DE68A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 03C9B5782F56CB97004DE68A;
-			remoteInfo = ClinicFlow;
-		};
-		03C9B5912F56CB98004DE68A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03C9B5712F56CB97004DE68A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 03C9B5782F56CB97004DE68A;
-			remoteInfo = ClinicFlow;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
-		03C9B5792F56CB97004DE68A /* ClinicFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClinicFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		03C9B5862F56CB98004DE68A /* ClinicFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClinicFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		03C9B5902F56CB98004DE68A /* ClinicFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClinicFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		410398D52F4C8675001CC73E /* ClinicFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClinicFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		03C9B57B2F56CB97004DE68A /* ClinicFlow */ = {
+		410398D72F4C8675001CC73E /* ClinicFlow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ClinicFlow;
-			sourceTree = "<group>";
-		};
-		03C9B5892F56CB98004DE68A /* ClinicFlowTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ClinicFlowTests;
-			sourceTree = "<group>";
-		};
-		03C9B5932F56CB98004DE68A /* ClinicFlowUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ClinicFlowUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		03C9B5762F56CB97004DE68A /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		03C9B5832F56CB98004DE68A /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		03C9B58D2F56CB98004DE68A /* Frameworks */ = {
+		410398D22F4C8675001CC73E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -72,22 +29,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		03C9B5702F56CB97004DE68A = {
+		410398CC2F4C8675001CC73E = {
 			isa = PBXGroup;
 			children = (
-				03C9B57B2F56CB97004DE68A /* ClinicFlow */,
-				03C9B5892F56CB98004DE68A /* ClinicFlowTests */,
-				03C9B5932F56CB98004DE68A /* ClinicFlowUITests */,
-				03C9B57A2F56CB97004DE68A /* Products */,
+				410398D72F4C8675001CC73E /* ClinicFlow */,
+				410398D62F4C8675001CC73E /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		03C9B57A2F56CB97004DE68A /* Products */ = {
+		410398D62F4C8675001CC73E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				03C9B5792F56CB97004DE68A /* ClinicFlow.app */,
-				03C9B5862F56CB98004DE68A /* ClinicFlowTests.xctest */,
-				03C9B5902F56CB98004DE68A /* ClinicFlowUITests.xctest */,
+				410398D52F4C8675001CC73E /* ClinicFlow.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,134 +48,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		03C9B5782F56CB97004DE68A /* ClinicFlow */ = {
+		410398D42F4C8675001CC73E /* ClinicFlow */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 03C9B59A2F56CB98004DE68A /* Build configuration list for PBXNativeTarget "ClinicFlow" */;
+			buildConfigurationList = 410398E02F4C8676001CC73E /* Build configuration list for PBXNativeTarget "ClinicFlow" */;
 			buildPhases = (
-				03C9B5752F56CB97004DE68A /* Sources */,
-				03C9B5762F56CB97004DE68A /* Frameworks */,
-				03C9B5772F56CB97004DE68A /* Resources */,
+				410398D12F4C8675001CC73E /* Sources */,
+				410398D22F4C8675001CC73E /* Frameworks */,
+				410398D32F4C8675001CC73E /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				03C9B57B2F56CB97004DE68A /* ClinicFlow */,
+				410398D72F4C8675001CC73E /* ClinicFlow */,
 			);
 			name = ClinicFlow;
 			packageProductDependencies = (
 			);
 			productName = ClinicFlow;
-			productReference = 03C9B5792F56CB97004DE68A /* ClinicFlow.app */;
+			productReference = 410398D52F4C8675001CC73E /* ClinicFlow.app */;
 			productType = "com.apple.product-type.application";
-		};
-		03C9B5852F56CB98004DE68A /* ClinicFlowTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 03C9B59D2F56CB98004DE68A /* Build configuration list for PBXNativeTarget "ClinicFlowTests" */;
-			buildPhases = (
-				03C9B5822F56CB98004DE68A /* Sources */,
-				03C9B5832F56CB98004DE68A /* Frameworks */,
-				03C9B5842F56CB98004DE68A /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				03C9B5882F56CB98004DE68A /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				03C9B5892F56CB98004DE68A /* ClinicFlowTests */,
-			);
-			name = ClinicFlowTests;
-			packageProductDependencies = (
-			);
-			productName = ClinicFlowTests;
-			productReference = 03C9B5862F56CB98004DE68A /* ClinicFlowTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		03C9B58F2F56CB98004DE68A /* ClinicFlowUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 03C9B5A02F56CB98004DE68A /* Build configuration list for PBXNativeTarget "ClinicFlowUITests" */;
-			buildPhases = (
-				03C9B58C2F56CB98004DE68A /* Sources */,
-				03C9B58D2F56CB98004DE68A /* Frameworks */,
-				03C9B58E2F56CB98004DE68A /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				03C9B5922F56CB98004DE68A /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				03C9B5932F56CB98004DE68A /* ClinicFlowUITests */,
-			);
-			name = ClinicFlowUITests;
-			packageProductDependencies = (
-			);
-			productName = ClinicFlowUITests;
-			productReference = 03C9B5902F56CB98004DE68A /* ClinicFlowUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		03C9B5712F56CB97004DE68A /* Project object */ = {
+		410398CD2F4C8675001CC73E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
-					03C9B5782F56CB97004DE68A = {
+					410398D42F4C8675001CC73E = {
 						CreatedOnToolsVersion = 26.2;
-					};
-					03C9B5852F56CB98004DE68A = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = 03C9B5782F56CB97004DE68A;
-					};
-					03C9B58F2F56CB98004DE68A = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = 03C9B5782F56CB97004DE68A;
 					};
 				};
 			};
-			buildConfigurationList = 03C9B5742F56CB97004DE68A /* Build configuration list for PBXProject "ClinicFlow" */;
+			buildConfigurationList = 410398D02F4C8675001CC73E /* Build configuration list for PBXProject "ClinicFlow" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 03C9B5702F56CB97004DE68A;
+			mainGroup = 410398CC2F4C8675001CC73E;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 03C9B57A2F56CB97004DE68A /* Products */;
+			productRefGroup = 410398D62F4C8675001CC73E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				03C9B5782F56CB97004DE68A /* ClinicFlow */,
-				03C9B5852F56CB98004DE68A /* ClinicFlowTests */,
-				03C9B58F2F56CB98004DE68A /* ClinicFlowUITests */,
+				410398D42F4C8675001CC73E /* ClinicFlow */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		03C9B5772F56CB97004DE68A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		03C9B5842F56CB98004DE68A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		03C9B58E2F56CB98004DE68A /* Resources */ = {
+		410398D32F4C8675001CC73E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -232,21 +115,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		03C9B5752F56CB97004DE68A /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		03C9B5822F56CB98004DE68A /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		03C9B58C2F56CB98004DE68A /* Sources */ = {
+		410398D12F4C8675001CC73E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -255,21 +124,8 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		03C9B5882F56CB98004DE68A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 03C9B5782F56CB97004DE68A /* ClinicFlow */;
-			targetProxy = 03C9B5872F56CB98004DE68A /* PBXContainerItemProxy */;
-		};
-		03C9B5922F56CB98004DE68A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 03C9B5782F56CB97004DE68A /* ClinicFlow */;
-			targetProxy = 03C9B5912F56CB98004DE68A /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin XCBuildConfiguration section */
-		03C9B5982F56CB98004DE68A /* Debug */ = {
+		410398DE2F4C8676001CC73E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -332,7 +188,7 @@
 			};
 			name = Debug;
 		};
-		03C9B5992F56CB98004DE68A /* Release */ = {
+		410398DF2F4C8676001CC73E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -388,7 +244,7 @@
 			};
 			name = Release;
 		};
-		03C9B59B2F56CB98004DE68A /* Debug */ = {
+		410398E12F4C8676001CC73E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -397,6 +253,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ClinicFlow needs camera access to take your profile photo.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ClinicFlow needs photo library access to choose your profile photo.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -407,7 +265,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "-53.ClinicFlow";
+				PRODUCT_BUNDLE_IDENTIFIER = "-52.ClinicFlow";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -419,7 +277,7 @@
 			};
 			name = Debug;
 		};
-		03C9B59C2F56CB98004DE68A /* Release */ = {
+		410398E22F4C8676001CC73E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -428,6 +286,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ClinicFlow needs camera access to take your profile photo.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ClinicFlow needs photo library access to choose your profile photo.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -438,7 +298,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "-53.ClinicFlow";
+				PRODUCT_BUNDLE_IDENTIFIER = "-52.ClinicFlow";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -447,129 +307,31 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		03C9B59E2F56CB98004DE68A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "-53.ClinicFlowTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClinicFlow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ClinicFlow";
-			};
-			name = Debug;
-		};
-		03C9B59F2F56CB98004DE68A /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "-53.ClinicFlowTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClinicFlow.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ClinicFlow";
-			};
-			name = Release;
-		};
-		03C9B5A12F56CB98004DE68A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "-53.ClinicFlowUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ClinicFlow;
-			};
-			name = Debug;
-		};
-		03C9B5A22F56CB98004DE68A /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "-53.ClinicFlowUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = ClinicFlow;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		03C9B5742F56CB97004DE68A /* Build configuration list for PBXProject "ClinicFlow" */ = {
+		410398D02F4C8675001CC73E /* Build configuration list for PBXProject "ClinicFlow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				03C9B5982F56CB98004DE68A /* Debug */,
-				03C9B5992F56CB98004DE68A /* Release */,
+				410398DE2F4C8676001CC73E /* Debug */,
+				410398DF2F4C8676001CC73E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		03C9B59A2F56CB98004DE68A /* Build configuration list for PBXNativeTarget "ClinicFlow" */ = {
+		410398E02F4C8676001CC73E /* Build configuration list for PBXNativeTarget "ClinicFlow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				03C9B59B2F56CB98004DE68A /* Debug */,
-				03C9B59C2F56CB98004DE68A /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		03C9B59D2F56CB98004DE68A /* Build configuration list for PBXNativeTarget "ClinicFlowTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				03C9B59E2F56CB98004DE68A /* Debug */,
-				03C9B59F2F56CB98004DE68A /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		03C9B5A02F56CB98004DE68A /* Build configuration list for PBXNativeTarget "ClinicFlowUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				03C9B5A12F56CB98004DE68A /* Debug */,
-				03C9B5A22F56CB98004DE68A /* Release */,
+				410398E12F4C8676001CC73E /* Debug */,
+				410398E22F4C8676001CC73E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 03C9B5712F56CB97004DE68A /* Project object */;
+	rootObject = 410398CD2F4C8675001CC73E /* Project object */;
 }
