@@ -3,12 +3,22 @@ import SwiftUI
 // MARK: - Empty Home View
 // Shown when user has no active appointments
 struct EmptyHomeView: View {
-
+    @EnvironmentObject var profileManager: UserProfileManager
+    @EnvironmentObject var hapticsManager: HapticsManager
+    @EnvironmentObject var activeProfileManager: ActiveProfileManager
+    @EnvironmentObject var notificationManager: NotificationManager
     @State private var showServiceSelection = false
     @State private var showNotifications = false
     @State private var showProfileSwitcher = false
     @State private var showProfileSetupPrompt = false
     @State private var showProfileView = false
+    
+    // Callback when appointment is booked — passes appointment data
+    var onAppointmentBooked: ((AppointmentData) -> Void)? = nil
+    
+    var unreadNotificationCount: Int {
+        notificationManager.unreadCount
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -43,6 +53,7 @@ struct EmptyHomeView: View {
                 HStack(spacing: 12) {
                     // Notification Button
                     Button(action: {
+                        hapticsManager.playTapSound()
                         showNotifications = true
                     }) {
                         ZStack {
@@ -55,38 +66,26 @@ struct EmptyHomeView: View {
                                 .foregroundColor(.primary)
                         }
                         .overlay(alignment: .topTrailing) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.red)
-                                    .frame(width: 18, height: 18)
-                                
-                                Text("3")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.white)
+                            if unreadNotificationCount > 0 {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.red)
+                                        .frame(width: 18, height: 18)
+                                    
+                                    Text("\(unreadNotificationCount)")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                                .offset(x: 4, y: -4)
                             }
-                            .offset(x: 4, y: -4)
                         }
                     }
                     .frame(width: 42, height: 42)
                     
-                    // Profile Button
-                    Button(action: {
+                    // Profile Button (YouTube-style switcher)
+                    ActiveProfileButton(size: 42) {
+                        hapticsManager.playTapSound()
                         showProfileSwitcher = true
-                    }) {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 42, height: 42)
-                            .overlay {
-                                Text("U")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                            }
                     }
                 }
             }
@@ -140,6 +139,7 @@ struct EmptyHomeView: View {
                 
                 // Book Appointment Button
                 Button(action: {
+                    hapticsManager.playNavigationSound()
                     showServiceSelection = true
                 }) {
                     HStack(spacing: 10) {
@@ -168,8 +168,53 @@ struct EmptyHomeView: View {
             .padding(.bottom, 60)
             
             Spacer()
+            
+       
         }
         .background(Color(.systemGroupedBackground))
+        .onAppear {
+            let name = profileManager.profile.fullName.isEmpty ? "" : ", \(profileManager.profile.fullName)"
+            hapticsManager.speak("Home screen\(name). No active appointments. Tap Book Appointment to schedule a visit.")
+            
+            // Show profile setup prompt if this is first login and profile not completed
+            if !profileManager.hasCompletedSetup {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showProfileSetupPrompt = true
+                }
+            }
+        }
+        .alert("Complete Your Profile", isPresented: $showProfileSetupPrompt) {
+            Button("Not Now", role: .cancel) { }
+            Button("Complete Profile") {
+                showProfileView = true
+            }
+        } message: {
+            Text("Complete your personal details to get a better experience and faster bookings.")
+        }
+        .sheet(isPresented: $showServiceSelection) {
+            NavigationStack {
+                HomeView(onAppointmentBooked: { data in
+                    // First dismiss the sheet, then trigger the callback
+                    showServiceSelection = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        onAppointmentBooked?(data)
+                    }
+                })
+            }
+        }
+        .sheet(isPresented: $showNotifications) {
+            NotificationView()
+        }
+        .sheet(isPresented: $showProfileSwitcher) {
+            NavigationStack {
+                ProfileSwitcherView()
+            }
+        }
+        .sheet(isPresented: $showProfileView) {
+            NavigationStack {
+                ProfileView()
+            }
+        }
     }
 }
 
@@ -211,4 +256,8 @@ struct QuickTipCard: View {
 
 #Preview {
     EmptyHomeView()
+        .environmentObject(UserProfileManager())
+        .environmentObject(HapticsManager())
+        .environmentObject(ActiveProfileManager())
+        .environmentObject(FamilyMembersManager())
 }
