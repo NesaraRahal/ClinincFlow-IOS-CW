@@ -186,6 +186,24 @@ struct EmptyHomeView: View {
         } message: {
             Text("Complete your personal details to get a better experience and faster bookings.")
         }
+        .sheet(isPresented: $showServiceSelection) {
+            NavigationStack {
+                HomeView(onAppointmentBooked: onAppointmentBooked)
+            }
+        }
+        .sheet(isPresented: $showNotifications) {
+            NotificationView()
+        }
+        .sheet(isPresented: $showProfileSwitcher) {
+            NavigationStack {
+                ProfileSwitcherView()
+            }
+        }
+        .sheet(isPresented: $showProfileView) {
+            NavigationStack {
+                ProfileView()
+            }
+        }
     }
 }
 
