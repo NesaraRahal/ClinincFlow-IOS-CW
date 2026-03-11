@@ -37,9 +37,41 @@ class ActiveProfileManager: ObservableObject {
     
     
     
+    /// Switch to a family member
+    func switchToMember(_ member: FamilyMember) {
+        withAnimation(.spring(response: 0.3)) {
+            activeProfile = .familyMember(id: member.id)
+        }
+    }
+    
     /// Check if a given profile is the active one
     func isActive(_ profile: ActiveProfile) -> Bool {
         activeProfile == profile
     }
     
+    /// Check if a specific family member is active
+    func isMemberActive(_ member: FamilyMember) -> Bool {
+        if case .familyMember(let id) = activeProfile {
+            return id == member.id
+        }
+        return false
+    }
+}
+
+// MARK: - ActiveProfile Display Helpers
+extension ActiveProfile {
+    /// Get the patient name for the current active profile
+    func patientName(profileManager: UserProfileManager, familyManager: FamilyMembersManager) -> String {
+        switch self {
+        case .myself:
+            return profileManager.profile.fullName.isEmpty ? "Self" : profileManager.profile.fullName
+        case .familyMember(let id):
+            return familyManager.member(byID: id)?.fullName ?? "Family Member"
+        }
+    }
+    
+    /// Get display name (alias for patientName)
+    func displayName(profileManager: UserProfileManager, familyManager: FamilyMembersManager) -> String {
+        patientName(profileManager: profileManager, familyManager: familyManager)
+    }
 }

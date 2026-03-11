@@ -19,6 +19,7 @@ struct HomeView: View {
     @EnvironmentObject var hapticsManager: HapticsManager
     @EnvironmentObject var profileManager: UserProfileManager
     @EnvironmentObject var activeProfileManager: ActiveProfileManager
+    @EnvironmentObject var familyManager: FamilyMembersManager
     var onAppointmentBooked: ((AppointmentData) -> Void)? = nil
     
     /// The patient name derived from the active profile
