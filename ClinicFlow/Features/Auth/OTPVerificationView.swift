@@ -20,9 +20,14 @@ struct OTPVerificationView: View {
     @State private var isVerifying = false
     @State private var timeRemaining = 60
     @State private var canResend = false
+    @State private var appearAnimation = false
+    @State private var shakeOffset: CGFloat = 0
     @Environment(\.dismiss) var dismiss
     
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    private let greenPrimary = Color(hex: "16A34A")
+    private let greenLight = Color(hex: "22C55E")
     
     var otpCode: String {
         otpDigits.joined()
@@ -34,79 +39,127 @@ struct OTPVerificationView: View {
     
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(
-                colors: [
-                    Color(hex: "F0FDF4"),
-                    Color(hex: "DCFCE7"),
-                    Color.white
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+            // Layered background
+            Color(hex: "F0FDF4").ignoresSafeArea()
+            
+            // Decorative blobs
+            GeometryReader { geo in
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color(hex: "BBF7D0").opacity(0.5), Color.clear],
+                            center: .center,
+                            startRadius: 10,
+                            endRadius: 140
+                        )
+                    )
+                    .frame(width: 280, height: 280)
+                    .offset(x: geo.size.width - 80, y: -60)
+                
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color(hex: "DCFCE7").opacity(0.4), Color.clear],
+                            center: .center,
+                            startRadius: 10,
+                            endRadius: 120
+                        )
+                    )
+                    .frame(width: 240, height: 240)
+                    .offset(x: -40, y: geo.size.height - 200)
+            }
             .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // Header
+                // MARK: - Back Button
                 HStack {
                     Button(action: {
                         dismiss()
                     }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .frame(width: 40, height: 40)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 44, height: 44)
+                                .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 3)
+                            
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.primary)
+                        }
                     }
                     
                     Spacer()
+                    
+                    // Step indicator
+                    HStack(spacing: 6) {
+                        Capsule()
+                            .fill(greenPrimary.opacity(0.3))
+                            .frame(width: 20, height: 4)
+                        Capsule()
+                            .fill(greenPrimary)
+                            .frame(width: 20, height: 4)
+                    }
+                    
+                    Spacer()
+                    
+                    // Invisible spacer for centering
+                    Color.clear
+                        .frame(width: 44, height: 44)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
-                .padding(.bottom, 24)
+                .padding(.bottom, 16)
                 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 32) {
-                        // Icon
+                    VStack(spacing: 28) {
+                        // MARK: - Icon
                         ZStack {
+                            // Soft glow behind
+                            Circle()
+                                .fill(greenPrimary.opacity(0.08))
+                                .frame(width: 110, height: 110)
+                            
                             Circle()
                                 .fill(
                                     LinearGradient(
-                                        colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
+                                        colors: [greenPrimary, greenLight],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
                                 )
-                                .frame(width: 80, height: 80)
-                                .shadow(color: Color(hex: "16A34A").opacity(0.25), radius: 15, x: 0, y: 8)
+                                .frame(width: 88, height: 88)
+                                .shadow(color: greenPrimary.opacity(0.3), radius: 20, x: 0, y: 10)
                             
-                            Image(systemName: "message.fill")
-                                .font(.system(size: 32, weight: .semibold))
+                            Image(systemName: "lock.shield.fill")
+                                .font(.system(size: 34, weight: .semibold))
                                 .foregroundColor(.white)
                         }
-                        .padding(.top, 20)
+                        .scaleEffect(appearAnimation ? 1.0 : 0.5)
+                        .opacity(appearAnimation ? 1 : 0)
+                        .padding(.top, 12)
                         
-                        // Title & Description
-                        VStack(spacing: 12) {
-                            Text("Verify Phone Number")
-                                .font(.system(size: 28, weight: .bold))
+                        // MARK: - Title & Description
+                        VStack(spacing: 10) {
+                            Text("Verification Code")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
                                 .foregroundColor(.primary)
                             
-                            Text("Enter the 6-digit code sent to")
-                                .font(.system(size: 15))
-                                .foregroundColor(.secondary)
-                            
-                            Text(phoneNumber)
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.primary)
+                            VStack(spacing: 4) {
+                                Text("We sent a 6-digit code to")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.secondary)
+                                
+                                Text(phoneNumber)
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(greenPrimary)
+                            }
                         }
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
+                        .opacity(appearAnimation ? 1 : 0)
+                        .offset(y: appearAnimation ? 0 : 15)
                         
-                        // OTP Input Fields
-                        HStack(spacing: 12) {
+                        // MARK: - OTP Input Fields
+                        HStack(spacing: 10) {
                             ForEach(0..<6, id: \.self) { index in
                                 OTPDigitField(
                                     digit: $otpDigits[index],
@@ -127,15 +180,32 @@ struct OTPVerificationView: View {
                                 .focused($focusedField, equals: index)
                             }
                         }
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 20)
+                        .offset(x: shakeOffset)
+                        .opacity(appearAnimation ? 1 : 0)
+                        .offset(y: appearAnimation ? 0 : 20)
                         
-                        // Timer & Resend
-                        VStack(spacing: 12) {
+                        // MARK: - Timer & Resend
+                        VStack(spacing: 8) {
                             if !canResend {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "clock.fill")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
+                                // Circular progress timer
+                                HStack(spacing: 10) {
+                                    ZStack {
+                                        Circle()
+                                            .stroke(Color(.systemGray5), lineWidth: 2.5)
+                                            .frame(width: 28, height: 28)
+                                        
+                                        Circle()
+                                            .trim(from: 0, to: CGFloat(timeRemaining) / 60.0)
+                                            .stroke(greenPrimary, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                                            .frame(width: 28, height: 28)
+                                            .rotationEffect(.degrees(-90))
+                                            .animation(.linear(duration: 1), value: timeRemaining)
+                                        
+                                        Text("\(timeRemaining)")
+                                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                                            .foregroundColor(greenPrimary)
+                                    }
                                     
                                     Text("Resend code in \(timeRemaining)s")
                                         .font(.system(size: 14, weight: .medium))
@@ -143,104 +213,133 @@ struct OTPVerificationView: View {
                                 }
                             } else {
                                 Button(action: resendOTP) {
-                                    HStack(spacing: 6) {
+                                    HStack(spacing: 8) {
                                         Image(systemName: "arrow.clockwise")
-                                            .font(.system(size: 14, weight: .semibold))
+                                            .font(.system(size: 14, weight: .bold))
                                         
                                         Text("Resend Code")
-                                            .font(.system(size: 15, weight: .semibold))
+                                            .font(.system(size: 15, weight: .bold))
                                     }
-                                    .foregroundColor(Color(hex: "16A34A"))
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 10)
-                                    .background(Color(hex: "16A34A").opacity(0.1))
+                                    .foregroundColor(greenPrimary)
+                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 12)
+                                    .background(greenPrimary.opacity(0.1))
                                     .clipShape(Capsule())
                                 }
                             }
                         }
+                        .padding(.top, 4)
                         
-                        // Stay Signed In (only for first-time users)
+                        // MARK: - Stay Signed In
                         if isFirstTimeUser {
-                            VStack(spacing: 16) {
-                                Divider()
-                                    .padding(.horizontal, 24)
-                                
-                                Button(action: {
+                            Button(action: {
+                                withAnimation(.spring(response: 0.3)) {
                                     staySignedIn.toggle()
-                                }) {
-                                    HStack(spacing: 12) {
-                                        Image(systemName: staySignedIn ? "checkmark.square.fill" : "square")
-                                            .font(.system(size: 22))
-                                            .foregroundColor(staySignedIn ? Color(hex: "16A34A") : .secondary)
-                                        
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text("Stay Signed In")
-                                                .font(.system(size: 16, weight: .semibold))
-                                                .foregroundColor(.primary)
-                                            
-                                            Text("You won't need to sign in again on this device")
-                                                .font(.system(size: 13))
-                                                .foregroundColor(.secondary)
-                                        }
-                                        
-                                        Spacer()
-                                    }
-                                    .padding(16)
-                                    .background(Color.white)
-                                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .stroke(
-                                                staySignedIn ? Color(hex: "16A34A").opacity(0.3) : Color(.systemGray5),
-                                                lineWidth: staySignedIn ? 2 : 1
-                                            )
-                                    }
-                                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
                                 }
-                                .padding(.horizontal, 24)
+                            }) {
+                                HStack(spacing: 14) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(staySignedIn ? greenPrimary : Color.clear)
+                                            .frame(width: 24, height: 24)
+                                            .overlay {
+                                                RoundedRectangle(cornerRadius: 6)
+                                                    .stroke(staySignedIn ? greenPrimary : Color(.systemGray3), lineWidth: 1.5)
+                                            }
+                                        
+                                        if staySignedIn {
+                                            Image(systemName: "checkmark")
+                                                .font(.system(size: 12, weight: .bold))
+                                                .foregroundColor(.white)
+                                        }
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Stay Signed In")
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundColor(.primary)
+                                        
+                                        Text("Keep me logged in on this device")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Spacer()
+                                }
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .fill(Color.white)
+                                )
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .stroke(
+                                            staySignedIn ? greenPrimary.opacity(0.4) : Color(.systemGray5),
+                                            lineWidth: 1
+                                        )
+                                }
+                                .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 3)
                             }
+                            .padding(.horizontal, 24)
                         }
                         
-                        // Verify Button
+                        // MARK: - Verify Button
                         Button(action: verifyOTP) {
-                            HStack(spacing: 8) {
+                            HStack(spacing: 10) {
                                 if isVerifying {
                                     ProgressView()
                                         .tint(.white)
                                 } else {
                                     Text("Verify & Continue")
-                                        .font(.system(size: 16, weight: .semibold))
+                                        .font(.system(size: 17, weight: .bold))
                                     
                                     Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 16))
+                                        .font(.system(size: 17))
                                 }
                             }
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 52)
+                            .frame(height: 56)
                             .background(
-                                isOTPComplete
-                                    ? LinearGradient(
-                                        colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                    : LinearGradient(
-                                        colors: [Color(.systemGray4), Color(.systemGray4)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
+                                Group {
+                                    if isOTPComplete {
+                                        LinearGradient(
+                                            colors: [greenPrimary, greenLight],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    } else {
+                                        LinearGradient(
+                                            colors: [Color(.systemGray4), Color(.systemGray3).opacity(0.8)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    }
+                                }
                             )
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                             .shadow(
-                                color: isOTPComplete ? Color(hex: "16A34A").opacity(0.3) : Color.clear,
-                                radius: 10,
+                                color: isOTPComplete ? greenPrimary.opacity(0.35) : Color.clear,
+                                radius: 12,
                                 x: 0,
-                                y: 5
+                                y: 6
                             )
+                            .animation(.spring(response: 0.4), value: isOTPComplete)
                         }
                         .disabled(!isOTPComplete || isVerifying)
                         .padding(.horizontal, 24)
+                        .padding(.top, 4)
+                        
+                        // Security notice
+                        HStack(spacing: 6) {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(.secondary.opacity(0.6))
+                            
+                            Text("Secured with end-to-end encryption")
+                                .font(.system(size: 11))
+                                .foregroundColor(.secondary.opacity(0.6))
+                        }
                         .padding(.top, 8)
                     }
                     .padding(.bottom, 40)
@@ -249,6 +348,9 @@ struct OTPVerificationView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.7)) {
+                appearAnimation = true
+            }
             // Auto-focus first field
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 focusedField = 0
@@ -311,24 +413,47 @@ struct OTPDigitField: View {
     let onCommit: () -> Void
     let onDelete: () -> Void
     
+    private let greenPrimary = Color(hex: "16A34A")
+    
     var body: some View {
         ZStack {
-            // Background
-            RoundedRectangle(cornerRadius: 12)
+            // Background with subtle gradient
+            RoundedRectangle(cornerRadius: 14)
                 .fill(Color.white)
             
-            RoundedRectangle(cornerRadius: 12)
+            // Border
+            RoundedRectangle(cornerRadius: 14)
                 .stroke(
                     isFocused
-                        ? Color(hex: "16A34A")
-                        : (digit.isEmpty ? Color(.systemGray5) : Color(hex: "16A34A").opacity(0.3)),
+                        ? greenPrimary
+                        : (digit.isEmpty ? Color(.systemGray5) : greenPrimary.opacity(0.35)),
                     lineWidth: isFocused ? 2 : 1
                 )
             
+            // Bottom accent line when focused
+            if isFocused {
+                VStack {
+                    Spacer()
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(greenPrimary)
+                        .frame(width: 20, height: 2.5)
+                        .padding(.bottom, 8)
+                }
+            }
+            
             // Digit text
             Text(digit)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.system(size: 26, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
+            
+            // Blinking cursor when empty + focused
+            if digit.isEmpty && isFocused {
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(greenPrimary)
+                    .frame(width: 2, height: 24)
+                    .opacity(isFocused ? 1 : 0)
+                    .modifier(BlinkingModifier())
+            }
             
             // Hidden TextField
             TextField("", text: $digit)
@@ -359,14 +484,30 @@ struct OTPDigitField: View {
                     return .handled
                 }
         }
-        .frame(width: 48, height: 56)
+        .frame(width: 50, height: 60)
         .shadow(
-            color: isFocused ? Color(hex: "16A34A").opacity(0.15) : Color.black.opacity(0.03),
-            radius: isFocused ? 8 : 4,
+            color: isFocused ? greenPrimary.opacity(0.15) : Color.black.opacity(0.03),
+            radius: isFocused ? 10 : 4,
             x: 0,
-            y: 2
+            y: isFocused ? 4 : 2
         )
-        .animation(.spring(response: 0.3), value: isFocused)
+        .scaleEffect(isFocused ? 1.05 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isFocused)
+    }
+}
+
+// MARK: - Blinking Cursor Modifier
+struct BlinkingModifier: ViewModifier {
+    @State private var isVisible = true
+    
+    func body(content: Content) -> some View {
+        content
+            .opacity(isVisible ? 1 : 0)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
+                    isVisible = false
+                }
+            }
     }
 }
 
