@@ -22,6 +22,37 @@ enum ActiveProfile: Equatable {
         if case .familyMember(let id) = self { return id }
         return nil
     }
+    
+    /// The patientName string used in AppointmentData / Visit
+    func patientName(profileManager: UserProfileManager, familyManager: FamilyMembersManager) -> String {
+        switch self {
+        case .myself:
+            return "Self"
+        case .familyMember(let id):
+            return familyManager.member(byID: id)?.fullName ?? "Self"
+        }
+    }
+    
+    /// Display name for the switcher
+    func displayName(profileManager: UserProfileManager, familyManager: FamilyMembersManager) -> String {
+        switch self {
+        case .myself:
+            let name = profileManager.profile.fullName
+            return name.isEmpty ? "Myself" : name
+        case .familyMember(let id):
+            return familyManager.member(byID: id)?.fullName ?? "Unknown"
+        }
+    }
+    
+    /// Initials for avatar fallback
+    func initials(profileManager: UserProfileManager, familyManager: FamilyMembersManager) -> String {
+        switch self {
+        case .myself:
+            return profileManager.profile.initials
+        case .familyMember(let id):
+            return familyManager.member(byID: id)?.initials ?? "?"
+        }
+    }
 }
 
 // MARK: - Active Profile Manager
@@ -35,8 +66,6 @@ class ActiveProfileManager: ObservableObject {
         }
     }
     
-    
-    
     /// Switch to a family member
     func switchToMember(_ member: FamilyMember) {
         withAnimation(.spring(response: 0.3)) {
@@ -49,29 +78,11 @@ class ActiveProfileManager: ObservableObject {
         activeProfile == profile
     }
     
-    /// Check if a specific family member is active
+    /// Check if a given family member is the active profile
     func isMemberActive(_ member: FamilyMember) -> Bool {
         if case .familyMember(let id) = activeProfile {
             return id == member.id
         }
         return false
-    }
-}
-
-// MARK: - ActiveProfile Display Helpers
-extension ActiveProfile {
-    /// Get the patient name for the current active profile
-    func patientName(profileManager: UserProfileManager, familyManager: FamilyMembersManager) -> String {
-        switch self {
-        case .myself:
-            return profileManager.profile.fullName.isEmpty ? "Self" : profileManager.profile.fullName
-        case .familyMember(let id):
-            return familyManager.member(byID: id)?.fullName ?? "Family Member"
-        }
-    }
-    
-    /// Get display name (alias for patientName)
-    func displayName(profileManager: UserProfileManager, familyManager: FamilyMembersManager) -> String {
-        patientName(profileManager: profileManager, familyManager: familyManager)
     }
 }
