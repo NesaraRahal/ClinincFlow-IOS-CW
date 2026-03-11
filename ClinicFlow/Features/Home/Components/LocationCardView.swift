@@ -11,9 +11,7 @@ struct LocationCardView: View {
     @Binding var showMap: Bool
     var onNavigateToMap: ((_ originID: String, _ destinationID: String) -> Void)? = nil
     
-    private var resolvedDestID: String {
-        ClinicMapStore.roomID(forDepartment: appointment.department, roomNumber: appointment.roomNumber) ?? "entrance"
-    }
+
     
     var body: some View {
         VStack(spacing: 16) {
@@ -29,10 +27,7 @@ struct LocationCardView: View {
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.secondary)
                     
-                    // Show resolved room ID
-                    Text(resolvedDestID)
-                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                        .foregroundColor(Color(hex: "16A34A"))
+
                 }
                 
                 Spacer()
@@ -57,11 +52,9 @@ struct LocationCardView: View {
             // Directions Button
             Button(action: {
                 hapticsManager.playNavigationSound()
-                if let navigate = onNavigateToMap {
-                    navigate("entrance", resolvedDestID)
-                } else {
+                
                     showMap = true
-                }
+            
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
