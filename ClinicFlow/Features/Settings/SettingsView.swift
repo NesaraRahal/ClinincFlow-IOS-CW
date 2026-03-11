@@ -1,133 +1,230 @@
-//
-//  SettingsView.swift
-//  ClinicFlow
-//
-
 import SwiftUI
 
 // MARK: - Settings View
 struct SettingsView: View {
     @Binding var isLoggedIn: Bool
-    @EnvironmentObject var hapticsManager: HapticsManager
     @EnvironmentObject var profileManager: UserProfileManager
-    @EnvironmentObject var appearanceManager: AppearanceManager
-    
-    @State private var showProfileView = false
-    @State private var showLogoutAlert = false
+    @EnvironmentObject var hapticsManager: HapticsManager
+    @EnvironmentObject var activeProfileManager: ActiveProfileManager
+    @EnvironmentObject var familyManager: FamilyMembersManager
+    @State private var showSignOutAlert = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Settings")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.primary)
-                    
-                    Text("Manage your preferences")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.secondary)
+        NavigationStack {
+            List {
+                // Profile Section
+                Section {
+                    NavigationLink {
+                        ProfileView()
+                    } label: {
+                        HStack(spacing: 16) {
+                            ZStack {
+                                if activeProfileManager.activeProfile.isSelf {
+                                    // Main user avatar
+                                    if let img = profileManager.profileImage {
+                                        Image(uiImage: img)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 60, height: 60)
+                                            .clipShape(Circle())
+                                    } else {
+                                        Circle()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .frame(width: 60, height: 60)
+                                        
+                                        Text(profileManager.profile.initials)
+                                            .font(.system(size: 22, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                } else if let id = activeProfileManager.activeProfile.familyMemberID {
+                                    // Family member avatar
+                                    if let img = familyManager.loadProfileImage(for: id) {
+                                        Image(uiImage: img)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 60, height: 60)
+                                            .clipShape(Circle())
+                                    } else if let member = familyManager.member(byID: id) {
+                                        Circle()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [member.iconColor, member.iconColor.opacity(0.6)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .frame(width: 60, height: 60)
+                                        
+                                        Text(member.initials)
+                                            .font(.system(size: 22, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                            }
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(activeProfileManager.activeProfile.displayName(
+                                    profileManager: profileManager,
+                                    familyManager: familyManager
+                                ))
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.primary)
+                                
+                                if activeProfileManager.activeProfile.isSelf {
+                                    Text("Patient ID: \(profileManager.profile.patientID)")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                } else if let id = activeProfileManager.activeProfile.familyMemberID,
+                                          let member = familyManager.member(byID: id) {
+                                    Text("\(member.relationship) • \(member.age) yrs")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                        .padding(.vertical, 8)
+                    }
                 }
                 
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 20)
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
-                    // Profile Section
-                    SettingsSection(title: "Account") {
-                        SettingsRow(icon: "person.fill", iconColor: Color(hex: "16A34A"), title: "My Profile", subtitle: profileManager.profile.fullName) {
-                            showProfileView = true
-                        }
+                // Family Members Section
+                Section {
+                    NavigationLink {
+                        FamilyMembersView()
+                    } label: {
+                        SettingsRow(
+                            icon: "person.2.fill",
+                            iconColor: Color(hex: "16A34A"),
+                            title: "Family Members",
+                            subtitle: "Manage family profiles"
+                        )
+                    }
+                } header: {
+                    Text("Family")
+                } footer: {
+                    Text("Add family members to book appointments on their behalf")
+                }
+                
+                // Preferences Section
+                Section("Preferences") {
+                    NavigationLink {
+                        NotificationSettingsView()
+                    } label: {
+                        SettingsRow(icon: "bell.fill", iconColor: .red, title: "Notifications")
                     }
                     
-                    // General Section
-                    SettingsSection(title: "General") {
-                        SettingsRow(icon: "bell.fill", iconColor: .orange, title: "Notifications", subtitle: "Manage alerts") { }
-                        
-                        SettingsRow(icon: "lock.fill", iconColor: .blue, title: "Privacy", subtitle: "Data & permissions") { }
-                        
-                        SettingsRow(icon: "questionmark.circle.fill", iconColor: .purple, title: "Help & Support", subtitle: "FAQs & contact") { }
+                    NavigationLink {
+                        LanguageSettingsView()
+                    } label: {
+                        SettingsRow(icon: "globe", iconColor: .blue, title: "Language")
                     }
                     
-                    // About Section
-                    SettingsSection(title: "About") {
-                        SettingsRow(icon: "info.circle.fill", iconColor: .gray, title: "App Version", subtitle: "1.0.0") { }
-                        
-                        SettingsRow(icon: "doc.text.fill", iconColor: .gray, title: "Terms of Service", subtitle: "") { }
+                    NavigationLink {
+                        AppearanceSettingsView()
+                    } label: {
+                        SettingsRow(icon: "moon.fill", iconColor: .purple, title: "Appearance")
+                    }
+                }
+                
+                // Accessibility Section
+                Section("Accessibility") {
+                    NavigationLink {
+                        AccessibilitySettingsView()
+                    } label: {
+                        SettingsRow(
+                            icon: "accessibility",
+                            iconColor: .indigo,
+                            title: "Accessibility",
+                            subtitle: "Haptics, sounds & screen reader"
+                        )
+                    }
+                }
+                
+                // Support Section
+                Section("Support") {
+                    NavigationLink {
+                        HelpCenterView()
+                    } label: {
+                        SettingsRow(icon: "questionmark.circle.fill", iconColor: .green, title: "Help Center")
                     }
                     
-                    // Logout Button
+                    NavigationLink {
+                        ContactUsView()
+                    } label: {
+                        SettingsRow(icon: "envelope.fill", iconColor: .orange, title: "Contact Us")
+                    }
+                    
+                    NavigationLink {
+                        TermsPrivacyView()
+                    } label: {
+                        SettingsRow(icon: "doc.text.fill", iconColor: .gray, title: "Terms & Privacy")
+                    }
+                }
+                
+                // Account Section
+                Section("Account") {
                     Button(action: {
-                        hapticsManager.playErrorSound()
-                        showLogoutAlert = true
+                        showSignOutAlert = true
                     }) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                                .font(.system(size: 16))
+                        HStack {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.red.opacity(0.15))
+                                    .frame(width: 32, height: 32)
+                                
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                    .font(.system(size: 15))
+                                    .foregroundColor(.red)
+                            }
                             
-                            Text("Log Out")
-                                .font(.system(size: 16, weight: .semibold))
+                            Text("Sign Out")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.red)
+                            
+                            Spacer()
                         }
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.red.opacity(0.08))
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .padding(.vertical, 4)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                    
-                    Spacer(minLength: 100)
+                }
+                
+                // App Info
+                Section {
+                    HStack {
+                        Text("Version")
+                            .foregroundColor(.primary)
+                        Spacer()
+                        Text("1.0.0")
+                            .foregroundColor(.secondary)
+                    }
+                } footer: {
+                    Text("ClinicFlow © 2026")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.bottom, 80)
                 }
             }
-        }
-        .background(Color(.systemGroupedBackground))
-        .alert("Log Out?", isPresented: $showLogoutAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Log Out", role: .destructive) {
-                UserDefaults.standard.set(false, forKey: "staySignedIn")
-                withAnimation(.easeInOut(duration: 0.35)) {
-                    isLoggedIn = false
+            .listStyle(.insetGrouped)
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
+            .alert("Sign Out", isPresented: $showSignOutAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Sign Out", role: .destructive) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        // Clear stay signed in preference
+                        UserDefaults.standard.set(false, forKey: "staySignedIn")
+                        isLoggedIn = false
+                    }
                 }
+            } message: {
+                Text("Are you sure you want to sign out? You will need to log in again to access your appointments.")
             }
-        } message: {
-            Text("Are you sure you want to log out?")
-        }
-        .sheet(isPresented: $showProfileView) {
-            NavigationStack {
-                ProfileView()
+            .onAppear {
+                hapticsManager.speak("Settings. Manage your preferences, accessibility, and account.")
             }
-        }
-        .onAppear {
-            hapticsManager.speak("Settings screen")
-        }
-    }
-}
-
-// MARK: - Settings Section
-struct SettingsSection<Content: View>: View {
-    let title: String
-    @ViewBuilder let content: Content
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(title.uppercased())
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.secondary)
-                .tracking(0.5)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
-            
-            VStack(spacing: 0) {
-                content
-            }
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .padding(.horizontal, 20)
         }
     }
 }
@@ -137,50 +234,40 @@ struct SettingsRow: View {
     let icon: String
     let iconColor: Color
     let title: String
-    let subtitle: String
-    let action: () -> Void
+    var subtitle: String? = nil
     
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(iconColor.opacity(0.12))
-                        .frame(width: 36, height: 36)
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(iconColor)
-                }
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(iconColor.opacity(0.15))
+                    .frame(width: 32, height: 32)
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.primary)
-                    
-                    if !subtitle.isEmpty {
-                        Text(subtitle)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color(.systemGray3))
+                Image(systemName: icon)
+                    .font(.system(size: 15))
+                    .foregroundColor(iconColor)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.primary)
+                
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(.secondary)
+                }
+            }
         }
-        .buttonStyle(.plain)
+        .padding(.vertical, 4)
     }
 }
 
 #Preview {
     SettingsView(isLoggedIn: .constant(true))
-        .environmentObject(HapticsManager())
         .environmentObject(UserProfileManager())
-        .environmentObject(AppearanceManager())
+        .environmentObject(HapticsManager())
+        .environmentObject(FamilyMembersManager())
+        .environmentObject(ActiveProfileManager())
 }
