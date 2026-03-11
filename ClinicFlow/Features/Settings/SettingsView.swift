@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var showLogoutAlert = false
     
     var body: some View {
+        NavigationStack {
         VStack(spacing: 0) {
             // Header
             HStack {
@@ -51,6 +52,41 @@ struct SettingsView: View {
                         SettingsRow(icon: "lock.fill", iconColor: .blue, title: "Privacy", subtitle: "Data & permissions") { }
                         
                         SettingsRow(icon: "questionmark.circle.fill", iconColor: .purple, title: "Help & Support", subtitle: "FAQs & contact") { }
+                        
+                        NavigationLink {
+                            AccessibilitySettingsView()
+                        } label: {
+                            HStack(spacing: 14) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.blue.opacity(0.12))
+                                        .frame(width: 36, height: 36)
+                                    
+                                    Image(systemName: "accessibility")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(.blue)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Accessibility")
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundColor(.primary)
+                                    
+                                    Text("Haptics, sounds & screen reader")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(Color(.systemGray3))
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(.plain)
                     }
                     
                     // About Section
@@ -105,6 +141,7 @@ struct SettingsView: View {
         .onAppear {
             hapticsManager.speak("Settings screen")
         }
+        } // NavigationStack
     }
 }
 
