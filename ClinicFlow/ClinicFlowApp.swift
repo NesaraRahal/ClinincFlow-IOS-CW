@@ -6,27 +6,29 @@
 //
 
 import SwiftUI
+import Combine
 
 @main
 struct ClinicFlowApp: App {
-    @StateObject private var hapticsManager = HapticsManager()
+    @StateObject private var appearanceManager = AppearanceManager()
     @StateObject private var profileManager = UserProfileManager()
+    @StateObject private var hapticsManager = HapticsManager()
+    @StateObject private var visitsManager = VisitsManager()
+    @StateObject private var familyManager = FamilyMembersManager()
     @StateObject private var activeProfileManager = ActiveProfileManager()
     @StateObject private var notificationManager = NotificationManager()
-    @StateObject private var familyManager = FamilyMembersManager()
-    @StateObject private var visitsManager = VisitsManager()
-    @StateObject private var appearanceManager = AppearanceManager()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(hapticsManager)
+                .environmentObject(appearanceManager)
                 .environmentObject(profileManager)
+                .environmentObject(hapticsManager)
+                .environmentObject(visitsManager)
+                .environmentObject(familyManager)
                 .environmentObject(activeProfileManager)
                 .environmentObject(notificationManager)
-                .environmentObject(familyManager)
-                .environmentObject(visitsManager)
-                .environmentObject(appearanceManager)
+                .preferredColorScheme(appearanceManager.colorScheme)
         }
     }
 }
