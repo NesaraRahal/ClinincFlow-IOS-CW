@@ -101,13 +101,12 @@ struct ServiceBookingFlow: View {
                     Button(action: {
                         dismiss()
                     }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 15, weight: .semibold))
-                            Text("Back")
-                                .font(.system(size: 16))
-                        }
-                        .foregroundColor(Color(hex: "16A34A"))
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(Color(hex: "16A34A"))
+                            .frame(width: 36, height: 36)
+                            .background(Color(hex: "16A34A").opacity(0.1))
+                            .clipShape(Circle())
                     }
                 }
             }
