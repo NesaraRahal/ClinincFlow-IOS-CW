@@ -396,5 +396,137 @@ struct RouteStore {
             CGPoint(x: 0.8042, y: 0.6689),
             CGPoint(x: 0.8078, y: 0.7260),
         ],
+
+        // ══ GROUND FLOOR — ELEVATOR ROUTES ═══════════════════════════════
+
+        // ⭐ elev-G → P-001
+        "elev-G→P-001": [
+            CGPoint(x: 0.0926, y: 0.6994),
+            CGPoint(x: 0.1323, y: 0.7034),
+            CGPoint(x: 0.1261, y: 0.2362),
+        ],
+
+        // ⭐ elev-G → P-002
+        "elev-G→P-002": [
+            CGPoint(x: 0.0952, y: 0.7074),
+            CGPoint(x: 0.2337, y: 0.7034),
+            CGPoint(x: 0.2328, y: 0.3159),
+            CGPoint(x: 0.2848, y: 0.3159),
+            CGPoint(x: 0.2866, y: 0.2362),
+        ],
+
+        // ══ 1ST FLOOR — OPD ↔ VACCINATION ════════════════════════════════
+
+        // ⭐ O-101 → V-101
+        "O-101→V-101": [
+            CGPoint(x: 0.1243, y: 0.2389),
+            CGPoint(x: 0.1243, y: 0.3185),
+            CGPoint(x: 0.6508, y: 0.3198),
+            CGPoint(x: 0.6508, y: 0.2429),
+        ],
+
+        // ⭐ O-102 → V-101
+        "O-102→V-101": [
+            CGPoint(x: 0.2848, y: 0.2535),
+            CGPoint(x: 0.2884, y: 0.3278),
+            CGPoint(x: 0.6490, y: 0.3305),
+            CGPoint(x: 0.6499, y: 0.2455),
+        ],
+
+        // ⭐ O-102 → V-102
+        "O-102→V-102": [
+            CGPoint(x: 0.2857, y: 0.2336),
+            CGPoint(x: 0.2857, y: 0.3265),
+            CGPoint(x: 0.8519, y: 0.3159),
+            CGPoint(x: 0.8545, y: 0.2455),
+        ],
+
+        // ⭐ O-103 → V-101
+        "O-103→V-101": [
+            CGPoint(x: 0.4621, y: 0.2601),
+            CGPoint(x: 0.4621, y: 0.3265),
+            CGPoint(x: 0.6526, y: 0.3278),
+            CGPoint(x: 0.6490, y: 0.2296),
+        ],
+
+        // ⭐ O-103 → V-102
+        "O-103→V-102": [
+            CGPoint(x: 0.4577, y: 0.2548),
+            CGPoint(x: 0.4594, y: 0.3198),
+            CGPoint(x: 0.8554, y: 0.3198),
+            CGPoint(x: 0.8589, y: 0.2469),
+        ],
+
+        // ══ 1ST FLOOR — RADIOLOGY / LAB ══════════════════════════════════
+
+        // ⭐ rad → L-102
+        "rad→L-102": [
+            CGPoint(x: 0.4594, y: 0.7061),
+            CGPoint(x: 0.2937, y: 0.7061),
+            CGPoint(x: 0.2954, y: 0.7432),
+        ],
+
+        // ══ 1ST FLOOR — ORTHOPEDIC (wait-1) ══════════════════════════════
+
+        // ⭐ wait-1 → rad
+        "wait-1→rad": [
+            CGPoint(x: 0.4744, y: 0.4393),
+            CGPoint(x: 0.5150, y: 0.4419),
+            CGPoint(x: 0.5115, y: 0.6729),
+            CGPoint(x: 0.4330, y: 0.6676),
+            CGPoint(x: 0.4409, y: 0.7153),
+        ],
+
+        // ⭐ wait-1 → blood (Dermatology)
+        "wait-1→blood": [
+            CGPoint(x: 0.4718, y: 0.4486),
+            CGPoint(x: 0.5159, y: 0.4499),
+            CGPoint(x: 0.5185, y: 0.6503),
+            CGPoint(x: 0.6164, y: 0.6583),
+            CGPoint(x: 0.6261, y: 0.7140),
+        ],
+
+        // ══ 1ST FLOOR — SPECIALIST CLINICS ═══════════════════════════════
+
+        // ⭐ S-101 (Cardiology) → blood (Dermatology)
+        "S-101→blood": [
+            CGPoint(x: 0.7407, y: 0.6052),
+            CGPoint(x: 0.7425, y: 0.6915),
+            CGPoint(x: 0.6252, y: 0.6782),
+            CGPoint(x: 0.6305, y: 0.7246),
+        ],
+
+        // ⭐ S-101 (Cardiology) → S-102 (Neurology)
+        "S-101→S-102": [
+            CGPoint(x: 0.7319, y: 0.6198),
+            CGPoint(x: 0.7319, y: 0.7034),
+            CGPoint(x: 0.8466, y: 0.6954),
+            CGPoint(x: 0.8448, y: 0.7472),
+        ],
+
+        // ⭐ S-102 (Neurology) → blood (Dermatology)
+        "S-102→blood": [
+            CGPoint(x: 0.8395, y: 0.7406),
+            CGPoint(x: 0.8404, y: 0.6915),
+            CGPoint(x: 0.6270, y: 0.6835),
+            CGPoint(x: 0.6323, y: 0.7299),
+        ],
+
+        // ⭐ S-102 (Neurology) → V-102
+        "S-102→V-102": [
+            CGPoint(x: 0.8413, y: 0.7034),
+            CGPoint(x: 0.8695, y: 0.6808),
+            CGPoint(x: 0.8757, y: 0.3013),
+            CGPoint(x: 0.8563, y: 0.2694),
+        ],
+
+        // ⭐ S-102 (Neurology) → V-101
+        "S-102→V-101": [
+            CGPoint(x: 0.8404, y: 0.7180),
+            CGPoint(x: 0.7981, y: 0.6901),
+            CGPoint(x: 0.8025, y: 0.3212),
+            CGPoint(x: 0.6481, y: 0.3185),
+            CGPoint(x: 0.6473, y: 0.2415),
+        ],
     ]
 }
