@@ -17,9 +17,9 @@ struct ServiceOption: Identifiable {
 struct HomeView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var hapticsManager: HapticsManager
+    @EnvironmentObject var familyManager: FamilyMembersManager
     @EnvironmentObject var profileManager: UserProfileManager
     @EnvironmentObject var activeProfileManager: ActiveProfileManager
-    @EnvironmentObject var familyManager: FamilyMembersManager
     var onAppointmentBooked: ((AppointmentData) -> Void)? = nil
     
     /// The patient name derived from the active profile

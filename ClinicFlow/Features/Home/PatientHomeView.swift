@@ -18,10 +18,19 @@ struct PatientHomeView: View {
     @State private var showCancelAlert = false
     @State private var showDoctorDetail = false
     @State private var showProgressDetail = false
+    @State private var showServiceSelection = false
+    @State private var selectedIndex: Int = 0
     
-    let appointment: AppointmentData
-    var onCancelAppointment: (() -> Void)? = nil
+    let appointments: [AppointmentData]
+    var onCancelAppointment: ((_ tokenNumber: String) -> Void)? = nil
     var onNavigateToMap: ((_ originID: String, _ destinationID: String) -> Void)? = nil
+    var onBookAnotherService: ((AppointmentData) -> Void)? = nil
+    
+    // Current appointment being viewed
+    private var appointment: AppointmentData {
+        let idx = min(selectedIndex, appointments.count - 1)
+        return appointments[max(0, idx)]
+    }
     
     var unreadNotificationCount: Int {
         notificationManager.unreadCount
@@ -65,6 +74,14 @@ struct PatientHomeView: View {
                     showProfileSwitcher: $showProfileSwitcher
                 )
                 
+                // MARK: - Active Queues Switcher (when multiple)
+                if appointments.count > 1 {
+                    ActiveQueuesSwitcher(
+                        appointments: appointments,
+                        selectedIndex: $selectedIndex
+                    )
+                }
+                
                 // MARK: - Hero Token Card
                 TokenCardView(appointment: appointment)
                 
@@ -91,6 +108,9 @@ struct PatientHomeView: View {
                 // MARK: - Assigned Staff Card
                 AssignedStaffCardView(appointment: appointment, showDoctorDetail: $showDoctorDetail)
                 
+                // MARK: - Book Another Service
+                BookAnotherServiceButton(showServiceSelection: $showServiceSelection)
+                
                 // MARK: - Cancel Appointment
                 CancelAppointmentButton(
                     showCancelAlert: $showCancelAlert,
@@ -106,13 +126,24 @@ struct PatientHomeView: View {
             announceAppointmentDetails()
             checkQueuePosition()
         }
+        .onChange(of: appointments.count) { _, newCount in
+            // If current index is now out of bounds, move to last
+            if selectedIndex >= newCount {
+                selectedIndex = max(0, newCount - 1)
+            }
+        }
         .alert("Cancel Appointment?", isPresented: $showCancelAlert) {
             Button("Keep Appointment", role: .cancel) { }
             Button("Yes, Cancel", role: .destructive) {
-                onCancelAppointment?()
+                let token = appointment.tokenNumber
+                // If cancelling the currently viewed one, adjust index
+                if selectedIndex > 0 && selectedIndex >= appointments.count - 1 {
+                    selectedIndex = selectedIndex - 1
+                }
+                onCancelAppointment?(token)
             }
         } message: {
-            Text("Are you sure you want to cancel your appointment? Your token \(appointment.tokenNumber) will be released and queue positions will be updated for other patients.")
+            Text("Are you sure you want to cancel your \(appointment.department) appointment? Your token \(appointment.tokenNumber) will be released.")
         }
         .sheet(isPresented: $showMap) {
             NavigationStack {
@@ -145,6 +176,23 @@ struct PatientHomeView: View {
         }
         .sheet(isPresented: $showProgressDetail) {
             VisitProgressDetailView(appointment: appointment, patientSteps: visitSteps)
+        }
+        .sheet(isPresented: $showServiceSelection) {
+            NavigationStack {
+                HomeView(onAppointmentBooked: { data in
+                    showServiceSelection = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        onBookAnotherService?(data)
+                    }
+                })
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { showServiceSelection = false }
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(Color(hex: "16A34A"))
+                    }
+                }
+            }
         }
     }
     
@@ -252,6 +300,150 @@ struct PatientHomeHeader: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
+    }
+}
+
+// MARK: - Active Queues Switcher
+struct ActiveQueuesSwitcher: View {
+    @EnvironmentObject var hapticsManager: HapticsManager
+    let appointments: [AppointmentData]
+    @Binding var selectedIndex: Int
+    
+    private let greenPrimary = Color(hex: "16A34A")
+    
+    private func iconForDepartment(_ dept: String) -> String {
+        switch dept {
+        case "Laboratory": return "flask.fill"
+        case "Pharmacy": return "cross.case.fill"
+        case "Radiology": return "waveform.path.ecg"
+        case "Vaccination": return "syringe.fill"
+        case "OPD": return "stethoscope"
+        case "Specialist Clinic": return "heart.text.square.fill"
+        default: return "cross.fill"
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("Active Queues")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Text("\(appointments.count) services")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 20)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(Array(appointments.enumerated()), id: \.offset) { index, appt in
+                        Button(action: {
+                            hapticsManager.playTapSound()
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                selectedIndex = index
+                            }
+                        }) {
+                            HStack(spacing: 10) {
+                                ZStack {
+                                    Circle()
+                                        .fill(selectedIndex == index ? greenPrimary : Color(.systemGray5))
+                                        .frame(width: 32, height: 32)
+                                    
+                                    Image(systemName: iconForDepartment(appt.department))
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundColor(selectedIndex == index ? .white : .secondary)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(appt.department)
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(selectedIndex == index ? greenPrimary : .primary)
+                                    
+                                    Text("Token #\(appt.tokenNumber)")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(selectedIndex == index ? greenPrimary.opacity(0.08) : Color(.systemBackground))
+                            )
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(
+                                        selectedIndex == index ? greenPrimary.opacity(0.4) : Color(.systemGray5),
+                                        lineWidth: selectedIndex == index ? 1.5 : 1
+                                    )
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+        }
+    }
+}
+
+// MARK: - Book Another Service Button
+struct BookAnotherServiceButton: View {
+    @EnvironmentObject var hapticsManager: HapticsManager
+    @Binding var showServiceSelection: Bool
+    
+    var body: some View {
+        Button(action: {
+            hapticsManager.playTapSound()
+            showServiceSelection = true
+        }) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "16A34A").opacity(0.1))
+                        .frame(width: 40, height: 40)
+                    
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(Color(hex: "16A34A"))
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Book Another Service")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    Text("Add X-Ray, Lab, Pharmacy & more to your visit")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.secondary)
+            }
+            .padding(16)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color(hex: "16A34A").opacity(0.3), Color(hex: "22C55E").opacity(0.2)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        lineWidth: 1
+                    )
+            }
+            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 3)
+        }
+        .padding(.horizontal, 20)
     }
 }
 
@@ -426,7 +618,7 @@ struct DirectionStep: View {
 
 #Preview {
     PatientHomeView(
-        appointment: AppointmentData.randomForService("OPD")
+        appointments: [AppointmentData.randomForService("OPD")]
     )
     .environmentObject(UserProfileManager())
     .environmentObject(HapticsManager())
