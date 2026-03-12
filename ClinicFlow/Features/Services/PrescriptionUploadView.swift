@@ -180,17 +180,12 @@ struct PrescriptionUploadView: View {
                     hapticsManager.playTapSound()
                     onBack()
                 }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 15, weight: .semibold))
-                        Text("Back")
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                    .foregroundColor(Color(hex: "16A34A"))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 54)
-                    .background(Color(hex: "16A34A").opacity(0.1))
-                    .clipShape(Capsule())
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(hex: "16A34A"))
+                        .frame(width: 54, height: 54)
+                        .background(Color(hex: "16A34A").opacity(0.1))
+                        .clipShape(Circle())
                 }
                 
                 // Continue Button
