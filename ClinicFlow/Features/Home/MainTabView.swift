@@ -58,13 +58,11 @@ struct MainTabView: View {
                 case .home:
                     if !profileAppointments.isEmpty {
                         PatientHomeView(
-                            appointment: profileAppointments.first!,
-                            onCancelAppointment: {
-                                if let appt = profileAppointments.first {
-                                    withAnimation(.spring()) {
-                                        visitsManager.cancelVisitByToken(appt.tokenNumber)
-                                        allActiveAppointments.removeAll { $0.tokenNumber == appt.tokenNumber }
-                                    }
+                            appointments: profileAppointments,
+                            onCancelAppointment: { tokenNumber in
+                                withAnimation(.spring()) {
+                                    visitsManager.cancelVisitByToken(tokenNumber)
+                                    allActiveAppointments.removeAll { $0.tokenNumber == tokenNumber }
                                 }
                             },
                             onNavigateToMap: { originID, destID in
@@ -72,6 +70,17 @@ struct MainTabView: View {
                                 mapDestinationID = destID
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                     selectedTab = .map
+                                }
+                            },
+                            onBookAnotherService: { data in
+                                withAnimation(.spring()) {
+                                    var bookingData = data
+                                    bookingData.patientName = activeProfileManager.activeProfile.patientName(
+                                        profileManager: profileManager,
+                                        familyManager: familyManager
+                                    )
+                                    allActiveAppointments.append(bookingData)
+                                    visitsManager.addVisit(from: bookingData)
                                 }
                             }
                         )

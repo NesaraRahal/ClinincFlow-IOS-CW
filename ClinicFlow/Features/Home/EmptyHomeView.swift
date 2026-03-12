@@ -82,6 +82,11 @@ struct EmptyHomeView: View {
                     }
                     .frame(width: 42, height: 42)
                     
+                    // Profile Button (YouTube-style switcher)
+                    ActiveProfileButton(size: 42) {
+                        hapticsManager.playTapSound()
+                        showProfileSwitcher = true
+                    }
                 }
             }
             .padding(.horizontal, 20)
@@ -188,7 +193,13 @@ struct EmptyHomeView: View {
         }
         .sheet(isPresented: $showServiceSelection) {
             NavigationStack {
-                HomeView(onAppointmentBooked: onAppointmentBooked)
+                HomeView(onAppointmentBooked: { data in
+                    // First dismiss the sheet, then trigger the callback
+                    showServiceSelection = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        onAppointmentBooked?(data)
+                    }
+                })
             }
         }
         .sheet(isPresented: $showNotifications) {
@@ -248,4 +259,5 @@ struct QuickTipCard: View {
         .environmentObject(UserProfileManager())
         .environmentObject(HapticsManager())
         .environmentObject(ActiveProfileManager())
+        .environmentObject(FamilyMembersManager())
 }
