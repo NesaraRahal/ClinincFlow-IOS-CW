@@ -18,6 +18,7 @@ struct FloorPlanView: View {
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
     @GestureState private var magnifyBy: CGFloat = 1.0
+    @State private var containerSize: CGSize = .zero
 
     /// Single clinic floor plan image used for all floors.
     private let imageName = "clinic_floor_plan"
@@ -37,6 +38,15 @@ struct FloorPlanView: View {
                     .gesture(dragGesture)
                     .gesture(pinchGesture)
                     .onTapGesture(count: 2) { resetView() }
+            }
+            .onAppear { containerSize = geo.size }
+        }
+        .onChange(of: isNavigating) { _, navigating in
+            if navigating { autoZoomToRoute() } else { resetView() }
+        }
+        .onChange(of: floorData.floor) { _, _ in
+            if isNavigating {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { autoZoomToRoute() }
             }
         }
     }
@@ -89,43 +99,25 @@ struct FloorPlanView: View {
 
     // MARK: - Room Hotspots
     private func roomHotspots(in size: CGSize) -> some View {
-        let isCrossFloor = isCrossFloorRoute
-        let elevID = ClinicMapStore.elevator(on: floorData.floor)?.id
-
-        return ZStack {
+        ZStack {
             ForEach(floorData.rooms) { room in
                 let frame = roomFrame(room, in: size)
                 let isOrigin = room.id == originID
                 let isDest   = room.id == destinationID
-                let isElevWaypoint = isCrossFloor && isNavigating && room.id == elevID
 
-                // Highlight border for origin / destination / elevator waypoint
-                if isOrigin || isDest || isElevWaypoint {
-                    RoomHighlight(
-                        isOrigin: isOrigin,
-                        isDestination: isDest || isElevWaypoint
-                    )
-                    .frame(width: frame.width, height: frame.height)
-                    .position(x: frame.midX, y: frame.midY)
+                if isOrigin || isDest {
+                    RoomHighlight(isOrigin: isOrigin, isDestination: isDest)
+                        .frame(width: frame.width, height: frame.height)
+                        .position(x: frame.midX, y: frame.midY)
                 }
 
-                // Invisible tap target
                 Color.clear
                     .contentShape(Rectangle())
                     .frame(width: frame.width, height: frame.height)
                     .position(x: frame.midX, y: frame.midY)
-                    .onTapGesture {
-                        onRoomTapped?(room)
-                    }
+                    .onTapGesture { onRoomTapped?(room) }
             }
         }
-    }
-
-    private var isCrossFloorRoute: Bool {
-        guard let oID = originID, let dID = destinationID,
-              let o = ClinicMapStore.room(id: oID),
-              let d = ClinicMapStore.room(id: dID) else { return false }
-        return o.floor != d.floor
     }
 
     // MARK: - POI Labels (visible room markers on the map)
@@ -173,6 +165,64 @@ struct FloorPlanView: View {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             scale = 1.0; lastScale = 1.0
             offset = .zero; lastOffset = .zero
+        }
+    }
+
+    // Zoom in to tightly frame the route path when navigation starts.
+    private func autoZoomToRoute() {
+        guard containerSize != .zero,
+              let oID = originID, let dID = destinationID,
+              let o = ClinicMapStore.room(id: oID),
+              let d = ClinicMapStore.room(id: dID) else { return }
+
+        let size = planSize(in: containerSize)
+
+        // Pick the correct route segment for this floor
+        let fromID: String
+        let toID: String
+        if o.floor == d.floor {
+            guard o.floor == floorData.floor else { return }
+            fromID = oID; toID = dID
+        } else {
+            guard let elev = ClinicMapStore.elevator(on: floorData.floor) else { return }
+            if floorData.floor == o.floor      { fromID = oID;    toID = elev.id }
+            else if floorData.floor == d.floor { fromID = elev.id; toID = dID    }
+            else { return }
+        }
+
+        guard let normPts = RouteStore.path(from: fromID, to: toID), !normPts.isEmpty else { return }
+
+        // Bounding box of route in normalised coords
+        let xs = normPts.map { $0.x }
+        let ys = normPts.map { $0.y }
+        let minX = xs.min()!, maxX = xs.max()!
+        let minY = ys.min()!, maxY = ys.max()!
+        let midX = (minX + maxX) / 2
+        let midY = (minY + maxY) / 2
+
+        // Add padding around the path (in normalised units)
+        let pad: CGFloat = 0.14
+        let boxW = max((maxX - minX + pad * 2) * size.width,  40)
+        let boxH = max((maxY - minY + pad * 2) * size.height, 40)
+
+        // Scale that fills 80% of the screen with the bounding box
+        let newScale = min(5.0, max(1.8, min(
+            containerSize.width  * 0.80 / boxW,
+            containerSize.height * 0.62 / boxH   // 0.62 leaves room for bottom panel
+        )))
+
+        // Offset to center the route mid-point on screen
+        // After scaleEffect(s), a canvas point p maps to:
+        //   screen = containerCenter + (p - canvasSize/2) * s + offset
+        // Setting screen == containerCenter gives:
+        //   offset = -(p - canvasSize/2) * s  =  (canvasSize/2 - p) * s
+        let newOffsetX = (size.width  / 2 - midX * size.width)  * newScale
+        let newOffsetY = (size.height / 2 - midY * size.height) * newScale - 60 // nudge up past panel
+
+        withAnimation(.spring(response: 0.65, dampingFraction: 0.82)) {
+            scale = newScale;  lastScale = newScale
+            offset = CGSize(width: newOffsetX, height: newOffsetY)
+            lastOffset = CGSize(width: newOffsetX, height: newOffsetY)
         }
     }
 
@@ -262,10 +312,10 @@ struct POILabel: View {
 
 
 // MARK: ─────────────────────────────────────────────
-// MARK: Route Overlay  (Google Maps–style highlighted path)
-// Uses A* pathfinding through the corridor graph for realistic
-// corridor-following routes, then renders a layered blue path
-// with glow, border, fill, inner highlight, and animated chevrons.
+// MARK: Route Overlay  (pre-defined corridor path)
+// Looks up the hand-traced path from RouteStore and renders a
+// Google Maps–style layered route: glow → border → blue fill →
+// inner highlight → animated chevrons.
 // MARK: ─────────────────────────────────────────────
 struct RouteOverlay: View {
     let floorData: FloorData
@@ -277,14 +327,8 @@ struct RouteOverlay: View {
     @State private var pulseScale: CGFloat = 1.0
     @State private var chevronPhase: CGFloat = 0
 
-    private var allRooms: [MapRoom] { ClinicMapStore.floors.flatMap(\.rooms) }
-    private var origin: MapRoom? { allRooms.first { $0.id == originID } }
-    private var destination: MapRoom? { allRooms.first { $0.id == destinationID } }
-
-    private var originOnFloor: Bool { origin?.floor == floorData.floor }
-    private var destOnFloor: Bool { destination?.floor == floorData.floor }
-    private var isCrossFloor: Bool { origin?.floor != destination?.floor }
-    private var elevator: MapRoom? { ClinicMapStore.elevator(on: floorData.floor) }
+    private var origin: MapRoom?      { ClinicMapStore.room(id: originID) }
+    private var destination: MapRoom? { ClinicMapStore.room(id: destinationID) }
 
     // Apple Maps-inspired route colours
     private let routeBlue   = Color(hex: "007AFF")
@@ -292,161 +336,98 @@ struct RouteOverlay: View {
     private let routeGlow   = Color(hex: "007AFF")
 
     var body: some View {
-        if let o = origin, let d = destination {
-            let waypoints = buildWaypoints(from: o, to: d)
-            let routePath = smoothPath(from: waypoints)
+        let waypoints = resolvedWaypoints()
+        guard waypoints.count >= 2 else { return AnyView(EmptyView()) }
 
-            ZStack {
-                // ── Highlighted corridor segments used by route ──
-                highlightedCorridors(waypoints: waypoints)
+        let routePath = smoothPath(from: waypoints)
 
-                // ── Route path layers (Google Maps style) ──
-                // 1. Outer glow
-                routePath
-                    .trim(from: 0, to: trimEnd)
-                    .stroke(routeGlow.opacity(0.18), lineWidth: 24)
-                    .blur(radius: 6)
+        return AnyView(ZStack {
+            // 1. Outer glow
+            routePath
+                .trim(from: 0, to: trimEnd)
+                .stroke(routeGlow.opacity(0.18), lineWidth: 24)
+                .blur(radius: 6)
 
-                // 2. Dark border
-                routePath
-                    .trim(from: 0, to: trimEnd)
-                    .stroke(routeBorder, style: StrokeStyle(lineWidth: 10, lineCap: .round, lineJoin: .round))
+            // 2. Dark border
+            routePath
+                .trim(from: 0, to: trimEnd)
+                .stroke(routeBorder, style: StrokeStyle(lineWidth: 10, lineCap: .round, lineJoin: .round))
 
-                // 3. Main blue fill
-                routePath
-                    .trim(from: 0, to: trimEnd)
-                    .stroke(routeBlue, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
+            // 3. Main blue fill
+            routePath
+                .trim(from: 0, to: trimEnd)
+                .stroke(routeBlue, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
 
-                // 4. Inner light highlight
-                routePath
-                    .trim(from: 0, to: trimEnd)
-                    .stroke(Color.white.opacity(0.30), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+            // 4. Inner light highlight
+            routePath
+                .trim(from: 0, to: trimEnd)
+                .stroke(Color.white.opacity(0.30), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
 
-                // 5. Animated walking chevrons
-                if trimEnd >= 1.0 {
-                    DirectionChevrons(waypoints: waypoints, phase: chevronPhase)
-                }
-
-                // ── Origin dot (start of this floor's segment) ──
-                if let startPt = waypoints.first, (originOnFloor || (destOnFloor && isCrossFloor)) {
-                    OriginDot(color: routeBlue, pulseScale: pulseScale)
-                        .position(startPt)
-                }
-
-                // ── Destination pin (end of this floor's segment) ──
-                if destOnFloor, let endPt = waypoints.last {
-                    DestinationPin()
-                        .position(x: endPt.x, y: endPt.y - 14)
-                        .opacity(trimEnd > 0.85 ? 1 : 0)
-                }
-
-                // ── Elevator badge (shows on the elevator end of each segment) ──
-                if isCrossFloor, let elev = elevator {
-                    let elevPt = roomPt(elev)
-                    ElevatorBadge()
-                        .position(originOnFloor ? elevPt : elevPt)
-                }
+            // 5. Animated walking chevrons
+            if trimEnd >= 1.0 {
+                DirectionChevrons(waypoints: waypoints, phase: chevronPhase)
             }
-            .onAppear {
-                withAnimation(.easeInOut(duration: 1.0)) { trimEnd = 1.0 }
-                withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
-                    pulseScale = 1.35
-                }
-                withAnimation(.linear(duration: 1.8).repeatForever(autoreverses: false)) {
-                    chevronPhase = 1.0
-                }
+
+            // Origin dot
+            if let startPt = waypoints.first {
+                OriginDot(color: routeBlue, pulseScale: pulseScale)
+                    .position(startPt)
+            }
+
+            // Destination pin
+            if let endPt = waypoints.last {
+                DestinationPin()
+                    .position(x: endPt.x, y: endPt.y - 14)
+                    .opacity(trimEnd > 0.85 ? 1 : 0)
             }
         }
-    }
-
-    // MARK: - Highlighted Corridor Segments
-    @ViewBuilder
-    private func highlightedCorridors(waypoints: [CGPoint]) -> some View {
-        Canvas { ctx, _ in
-            for seg in floorData.corridors {
-                let from = CGPoint(x: seg.from.x * size.width, y: seg.from.y * size.height)
-                let to = CGPoint(x: seg.to.x * size.width, y: seg.to.y * size.height)
-
-                if routeUsesCorridor(from: from, to: to, waypoints: waypoints) {
-                    var path = Path()
-                    path.move(to: from)
-                    path.addLine(to: to)
-
-                    ctx.stroke(path, with: .color(Color(hex: "007AFF").opacity(0.14)),
-                               style: StrokeStyle(lineWidth: 20, lineCap: .round))
-                    ctx.stroke(path, with: .color(Color(hex: "007AFF").opacity(0.08)),
-                               style: StrokeStyle(lineWidth: 12, lineCap: .round))
-                }
+        .onAppear {
+            trimEnd = 0
+            withAnimation(.easeInOut(duration: 1.0)) { trimEnd = 1.0 }
+            withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+                pulseScale = 1.35
             }
-        }
-        .allowsHitTesting(false)
-        .opacity(trimEnd > 0 ? 1 : 0)
+            withAnimation(.linear(duration: 1.8).repeatForever(autoreverses: false)) {
+                chevronPhase = 1.0
+            }
+        })
     }
 
-    private func routeUsesCorridor(from: CGPoint, to: CGPoint, waypoints: [CGPoint]) -> Bool {
-        let threshold: CGFloat = 18
-        for i in 0..<max(0, waypoints.count - 1) {
-            let a = waypoints[i], b = waypoints[i + 1]
-            let distA = ptSegDist(a, from, to)
-            let distB = ptSegDist(b, from, to)
-            if distA < threshold && distB < threshold { return true }
-            let distF = ptSegDist(from, a, b)
-            let distT = ptSegDist(to, a, b)
-            if distF < threshold && distT < threshold { return true }
-        }
-        return false
-    }
+    // MARK: - Resolve waypoints from RouteStore
+    // For a same-floor route: look up originID→destinationID directly.
+    // For a cross-floor route: each floor shows originID→elevator or
+    // elevator→destinationID using the elevator as the mid-point.
+    private func resolvedWaypoints() -> [CGPoint] {
+        guard let o = origin, let d = destination else { return [] }
 
-    private func ptSegDist(_ p: CGPoint, _ a: CGPoint, _ b: CGPoint) -> CGFloat {
-        let dx = b.x - a.x, dy = b.y - a.y
-        let lenSq = dx*dx + dy*dy
-        guard lenSq > 0 else { return hypot(p.x - a.x, p.y - a.y) }
-        let t = max(0, min(1, ((p.x - a.x)*dx + (p.y - a.y)*dy) / lenSq))
-        return hypot(p.x - (a.x + t*dx), p.y - (a.y + t*dy))
-    }
+        let isCross = o.floor != d.floor
+        let elevOnFloor = ClinicMapStore.elevator(on: floorData.floor)
 
-    // MARK: - Waypoint Construction (A* based)
-    private func roomPt(_ room: MapRoom) -> CGPoint {
-        if room.floor == floorData.floor {
-            return CGPoint(x: room.rect.midX * size.width, y: room.rect.midY * size.height)
-        }
-        if let elev = elevator {
-            return CGPoint(x: elev.rect.midX * size.width, y: elev.rect.midY * size.height)
-        }
-        return CGPoint(x: size.width * 0.5, y: size.height * 0.5)
-    }
+        let fromID: String
+        let toID: String
 
-    /// Builds an A*-routed polyline appropriate for the current floor.
-    /// - Same floor: origin → destination
-    /// - Cross-floor, origin side: origin → elevator
-    /// - Cross-floor, destination side: elevator → destination
-    private func buildWaypoints(from o: MapRoom, to d: MapRoom) -> [CGPoint] {
-        let startNorm: CGPoint
-        let endNorm: CGPoint
-
-        if o.floor == d.floor {
-            // Same floor: direct route
-            startNorm = CGPoint(x: o.rect.midX, y: o.rect.midY)
-            endNorm   = CGPoint(x: d.rect.midX, y: d.rect.midY)
-        } else if originOnFloor, let elev = elevator {
-            // On origin floor → route from origin to elevator
-            startNorm = CGPoint(x: o.rect.midX, y: o.rect.midY)
-            endNorm   = CGPoint(x: elev.rect.midX, y: elev.rect.midY)
-        } else if destOnFloor, let elev = elevator {
-            // On destination floor → route from elevator to destination
-            startNorm = CGPoint(x: elev.rect.midX, y: elev.rect.midY)
-            endNorm   = CGPoint(x: d.rect.midX, y: d.rect.midY)
+        if !isCross {
+            guard o.floor == floorData.floor else { return [] }
+            fromID = originID
+            toID   = destinationID
         } else {
-            return [] // not on a relevant floor — no route to show
+            guard let elev = elevOnFloor else { return [] }
+            if floorData.floor == o.floor {
+                fromID = originID
+                toID   = elev.id
+            } else if floorData.floor == d.floor {
+                fromID = elev.id
+                toID   = destinationID
+            } else {
+                return []
+            }
         }
 
-        let normPath = ClinicMapStore.findPath(from: startNorm, to: endNorm)
-        return normPath.map { CGPoint(x: $0.x * size.width, y: $0.y * size.height) }
+        guard let normPts = RouteStore.path(from: fromID, to: toID) else { return [] }
+        return normPts.map { CGPoint(x: $0.x * size.width, y: $0.y * size.height) }
     }
 
-    private func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat { hypot(a.x - b.x, a.y - b.y) }
-
-    /// Smooth path with rounded corners at turns.
+    // MARK: - Smooth path with rounded corners at turns
     private func smoothPath(from points: [CGPoint]) -> Path {
         guard points.count >= 2 else { return Path() }
         let r: CGFloat = 12
@@ -455,7 +436,6 @@ struct RouteOverlay: View {
             for i in 1..<points.count {
                 let prev = points[max(0, i - 1)]
                 let curr = points[i]
-
                 if i < points.count - 1 {
                     let dx1 = curr.x - prev.x, dy1 = curr.y - prev.y
                     let len1 = hypot(dx1, dy1)
