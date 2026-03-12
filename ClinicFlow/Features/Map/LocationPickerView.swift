@@ -14,7 +14,7 @@ struct LocationPickerView: View {
     @State private var activeFloorTab: Int? = nil  // nil = All
 
     private let floorTabs: [(String, Int?)] = [
-        ("All", nil), ("G", 0), ("1", 1), ("2", 2), ("3", 3)
+        ("All", nil), ("G", 0), ("1", 1)
     ]
 
     private var filteredRooms: [MapRoom] {
