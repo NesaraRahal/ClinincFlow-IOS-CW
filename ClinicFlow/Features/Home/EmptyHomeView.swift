@@ -96,13 +96,16 @@ struct EmptyHomeView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
-            .padding(.bottom, 12)
-            .background(Color(.systemBackground))
+            .padding(.bottom, 20)
+            .background(
+                Color(.systemBackground)
+                    .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+            )
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     Spacer()
-                        .frame(height: 16)
+                        .frame(height: 8)
                     
                     // MARK: - Empty State Illustration
                     VStack(spacing: 32) {
@@ -181,6 +184,38 @@ struct EmptyHomeView: View {
                         .padding(.top, 8)
                     }
                     
+                    // MARK: - Health Stats Banner
+                    VStack(spacing: 0) {
+                        HStack(spacing: 20) {
+                            HealthStatCard(
+                                icon: "heart.circle.fill",
+                                iconColor: Color(hex: "EF4444"),
+                                value: "24/7",
+                                label: "Available"
+                            )
+                            
+                            HealthStatCard(
+                                icon: "person.3.fill",
+                                iconColor: Color(hex: "3B82F6"),
+                                value: "50+",
+                                label: "Specialists"
+                            )
+                            
+                            HealthStatCard(
+                                icon: "clock.fill",
+                                iconColor: Color(hex: "F59E0B"),
+                                value: "15min",
+                                label: "Avg Wait"
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 20)
+                    }
+                    .background(Color(.systemGroupedBackground))
+                    
+                    Spacer()
+                        .frame(height: 8)
+                    
                     // MARK: - Quick Tips Section
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
@@ -193,7 +228,7 @@ struct EmptyHomeView: View {
                                 .foregroundColor(.primary)
                         }
                         .padding(.horizontal, 20)
-                        .padding(.top, 36)
+                        .padding(.top, 32)
                         
                         HStack(spacing: 12) {
                             QuickTipCard(
@@ -252,7 +287,8 @@ struct EmptyHomeView: View {
                             }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.top, 36)
+                        .padding(.top, 32)
+                        
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 16) {
@@ -284,6 +320,7 @@ struct EmptyHomeView: View {
                                 )
                             }
                             .padding(.horizontal, 20)
+                            .padding(.bottom, 28)
                         }
                     }
                     
@@ -423,155 +460,113 @@ struct FeaturedDoctorCard: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 0) {
-                // Doctor Image with Overlay
-                ZStack(alignment: .bottom) {
-                    ZStack(alignment: .topTrailing) {
-                        if let uiImage = UIImage(named: doctor.imageName) {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 280, height: 200)
-                                .clipped()
-                        } else {
-                            Rectangle()
-                                .fill(LinearGradient(
-                                    colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ))
-                                .frame(width: 280, height: 200)
-                                .overlay(
-                                    Image(systemName: "stethoscope")
-                                        .font(.system(size: 60, weight: .light))
-                                        .foregroundColor(.white.opacity(0.3))
-                                )
-                        }
+            VStack(alignment: .leading, spacing: 12) {
+                // Doctor Image with Heart Icon
+                ZStack(alignment: .topTrailing) {
+                    if let uiImage = UIImage(named: doctor.imageName) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 300, height: 300)
+                            .clipped()
+                    } else {
+                        Rectangle()
+                            .fill(LinearGradient(
+                                colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                            .frame(width: 300, height: 300)
+                            .overlay(
+                                Image(systemName: "stethoscope")
+                                    .font(.system(size: 70, weight: .light))
+                                    .foregroundColor(.white.opacity(0.3))
+                            )
+                    }
+                    
+                    // Heart/Favorite Button (Airbnb style)
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 36, height: 36)
+                        .overlay(
+                            Image(systemName: "heart")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
+                        )
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        .padding(16)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 32))
+                
+                // Doctor Info Below Image
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(doctor.name)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                        
+                        Spacer()
                         
                         // Availability Badge
                         if doctor.isAvailable {
-                            HStack(spacing: 4) {
+                            HStack(spacing: 3) {
                                 Circle()
                                     .fill(Color(hex: "10B981"))
                                     .frame(width: 6, height: 6)
                                 
-                                Text("Available Today")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(.white)
+                                Text("Available")
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(Color(hex: "10B981"))
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(
-                                Capsule()
-                                    .fill(.ultraThinMaterial)
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-                                    )
-                            )
-                            .padding(12)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(hex: "10B981").opacity(0.1))
+                            .clipShape(Capsule())
                         }
                     }
                     
-                    // Gradient Overlay at bottom for better text readability
-                    LinearGradient(
-                        colors: [Color.black.opacity(0), Color.black.opacity(0.4)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: 80)
-                }
-                
-                // Doctor Info
-                VStack(alignment: .leading, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(doctor.name)
-                            .font(.system(size: 17, weight: .bold))
-                            .foregroundColor(.primary)
-                            .lineLimit(1)
+                    HStack(spacing: 6) {
+                        Image(systemName: "cross.case.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
                         
-                        HStack(spacing: 6) {
-                            Image(systemName: "cross.case.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(Color(hex: "16A34A"))
-                            
-                            Text(doctor.specialty)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(Color(hex: "16A34A"))
-                                .lineLimit(1)
-                        }
+                        Text(doctor.specialty)
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
                     }
                     
-                    // Qualification
-                    Text(doctor.qualification)
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                    
-                    Divider()
-                        .padding(.vertical, 2)
-                    
-                    HStack(spacing: 16) {
+                    HStack(spacing: 8) {
                         // Rating
-                        HStack(spacing: 4) {
+                        HStack(spacing: 3) {
                             Image(systemName: "star.fill")
-                                .font(.system(size: 13))
-                                .foregroundColor(Color(hex: "F59E0B"))
-                            
-                            Text(String(format: "%.1f", doctor.rating))
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.system(size: 12))
                                 .foregroundColor(.primary)
                             
-                            Text("(\(doctor.reviewCount))")
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                            Text(String(format: "%.1f", doctor.rating))
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.primary)
                         }
+                        
+                        Text("•")
+                            .foregroundColor(.secondary)
+                        
+                        Text("\(doctor.reviewCount) reviews")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(.secondary)
                         
                         Spacer()
                         
-                        // Experience
-                        HStack(spacing: 4) {
-                            Image(systemName: "briefcase.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
-                            
-                            Text("\(doctor.experience) yrs")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
-                    // Fee Badge
-                    HStack {
-                        Spacer()
-                        
-                        HStack(spacing: 6) {
-                            Text("Fee:")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.secondary)
-                            
-                            Text(doctor.consultationFee)
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(Color(hex: "16A34A"))
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(Color(hex: "16A34A").opacity(0.1))
-                        .clipShape(Capsule())
-                        
-                        Spacer()
+                        // Fee
+                        Text(doctor.consultationFee)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.primary)
                     }
                 }
-                .padding(18)
+                .padding(.horizontal, 4)
             }
-            .frame(width: 280)
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 6)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color(.systemGray5), lineWidth: 0.5)
-            )
+            .frame(width: 300)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -624,10 +619,48 @@ struct ServiceFeatureRow: View {
     }
 }
 
+// MARK: - Health Stat Card
+struct HealthStatCard: View {
+    let icon: String
+    let iconColor: Color
+    let value: String
+    let label: String
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(iconColor.opacity(0.15))
+                    .frame(width: 48, height: 48)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 22))
+                    .foregroundColor(iconColor)
+            }
+            
+            VStack(spacing: 2) {
+                Text(value)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Text(label)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+    }
+}
+
 #Preview {
     EmptyHomeView()
         .environmentObject(UserProfileManager())
         .environmentObject(HapticsManager())
         .environmentObject(ActiveProfileManager())
         .environmentObject(FamilyMembersManager())
+        .environmentObject(NotificationManager())
 }
