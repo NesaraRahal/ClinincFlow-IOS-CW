@@ -24,6 +24,15 @@ struct MainTabView: View {
         )
         return allActiveAppointments.filter { $0.patientName == name }
     }
+
+    private var prioritizedAppointment: AppointmentData? {
+        profileAppointments.min {
+            if $0.patientsAhead == $1.patientsAhead {
+                return $0.tokenNumber < $1.tokenNumber
+            }
+            return $0.patientsAhead < $1.patientsAhead
+        }
+    }
     
     enum Tab: String, CaseIterable {
         case home = "Home"
@@ -109,11 +118,29 @@ struct MainTabView: View {
                     SettingsView(isLoggedIn: $isLoggedIn)
                 }
             }
+
+            if let prioritizedAppointment,
+               selectedTab != .home {
+                OngoingAppointmentBubble(
+                    appointment: prioritizedAppointment,
+                    extraCount: max(profileAppointments.count - 1, 0)
+                ) {
+                    hapticsManager.playTapSound()
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+                        selectedTab = .home
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 126)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
             
             // Custom Tab Bar
             CustomTabBar(selectedTab: $selectedTab)
         }
         .ignoresSafeArea(.keyboard)
+        .animation(.spring(response: 0.35, dampingFraction: 0.82), value: selectedTab)
+        .animation(.spring(response: 0.35, dampingFraction: 0.82), value: profileAppointments.count)
         .onChange(of: selectedTab) { _, newTab in
             hapticsManager.playNavigationSound()
             hapticsManager.speak("\(newTab.rawValue) tab selected")
