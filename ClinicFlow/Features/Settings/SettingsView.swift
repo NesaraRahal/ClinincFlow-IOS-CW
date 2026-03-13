@@ -7,11 +7,87 @@ struct SettingsView: View {
     @EnvironmentObject var hapticsManager: HapticsManager
     @EnvironmentObject var activeProfileManager: ActiveProfileManager
     @EnvironmentObject var familyManager: FamilyMembersManager
+    @EnvironmentObject var notificationManager: NotificationManager
     @State private var showSignOutAlert = false
+    @State private var showNotifications = false
+    @State private var showProfileSwitcher = false
+
+    var unreadNotificationCount: Int {
+        notificationManager.unreadCount
+    }
     
     var body: some View {
         NavigationStack {
-            List {
+            VStack(spacing: 0) {
+                // MARK: - Custom Header
+                HStack {
+                    HStack(spacing: 8) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 36, height: 36)
+
+                            Image(systemName: "cross.fill")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+
+                        Text("ClinicFlow")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                    }
+
+                    Spacer()
+
+                    HStack(spacing: 12) {
+                        Button(action: {
+                            hapticsManager.playTapSound()
+                            showNotifications = true
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(.systemGray6))
+                                    .frame(width: 42, height: 42)
+
+                                Image(systemName: "bell.fill")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.primary)
+                            }
+                            .overlay(alignment: .topTrailing) {
+                                if unreadNotificationCount > 0 {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.red)
+                                            .frame(width: 18, height: 18)
+
+                                        Text("\(unreadNotificationCount)")
+                                            .font(.system(size: 10, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                    .offset(x: 4, y: -4)
+                                }
+                            }
+                        }
+                        .frame(width: 42, height: 42)
+
+                        ActiveProfileButton(size: 42) {
+                            hapticsManager.playTapSound()
+                            showProfileSwitcher = true
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
+                .background(Color(.systemGroupedBackground))
+
+                List {
                 // Profile Section
                 Section {
                     NavigationLink {
@@ -123,12 +199,6 @@ struct SettingsView: View {
                     } label: {
                         SettingsRow(icon: "globe", iconColor: .blue, title: "Language")
                     }
-                    
-                    NavigationLink {
-                        AppearanceSettingsView()
-                    } label: {
-                        SettingsRow(icon: "moon.fill", iconColor: .purple, title: "Appearance")
-                    }
                 }
                 
                 // Accessibility Section
@@ -140,7 +210,7 @@ struct SettingsView: View {
                             icon: "accessibility",
                             iconColor: .indigo,
                             title: "Accessibility",
-                            subtitle: "Haptics, sounds & screen reader"
+                            subtitle: "Haptics, sounds, dynamic type & screen reader"
                         )
                     }
                 }
@@ -208,8 +278,8 @@ struct SettingsView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.large)
+            } // end VStack
+            .toolbar(.hidden, for: .navigationBar)
             .alert("Sign Out", isPresented: $showSignOutAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Sign Out", role: .destructive) {
@@ -225,6 +295,14 @@ struct SettingsView: View {
             .onAppear {
                 hapticsManager.speak("Settings. Manage your preferences, accessibility, and account.")
             }
+        .sheet(isPresented: $showNotifications) {
+            NotificationView()
+        }
+        .sheet(isPresented: $showProfileSwitcher) {
+            NavigationStack {
+                ProfileSwitcherView()
+            }
+        }
         }
     }
 }

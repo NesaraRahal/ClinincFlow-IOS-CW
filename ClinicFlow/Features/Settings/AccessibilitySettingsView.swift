@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Accessibility Settings View
 struct AccessibilitySettingsView: View {
     @EnvironmentObject var hapticsManager: HapticsManager
+    @AppStorage("useDynamicType") private var useDynamicType = true
     
     var body: some View {
         List {
@@ -110,6 +111,22 @@ struct AccessibilitySettingsView: View {
             } footer: {
                 Text("When enabled, the app will read aloud key screen content, navigation actions, and booking details to assist users with vision impairments. Uses text-to-speech.")
             }
+
+            // MARK: - Text & Display
+            Section {
+                Toggle(isOn: $useDynamicType) {
+                    SettingsToggleLabel(
+                        icon: "textformat.size",
+                        iconColor: .purple,
+                        title: "Dynamic Type"
+                    )
+                }
+                .tint(Color(hex: "16A34A"))
+            } header: {
+                Text("Text & Display")
+            } footer: {
+                Text("Allow larger text scaling based on system text size preferences.")
+            }
             
             // MARK: - System Accessibility
             Section {
@@ -134,7 +151,7 @@ struct AccessibilitySettingsView: View {
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(.primary)
                             
-                            Text("VoiceOver, Dynamic Type, Reduce Motion & more")
+                            Text("VoiceOver, Reduce Motion, AssistiveTouch & more")
                                 .font(.system(size: 12))
                                 .foregroundColor(.secondary)
                         }
@@ -150,7 +167,7 @@ struct AccessibilitySettingsView: View {
             } header: {
                 Text("System")
             } footer: {
-                Text("Open iOS Accessibility settings for additional features like VoiceOver, Dynamic Type, and Reduce Motion.")
+                Text("Open iOS Accessibility settings for additional features like VoiceOver and Reduce Motion.")
             }
         }
         .listStyle(.insetGrouped)

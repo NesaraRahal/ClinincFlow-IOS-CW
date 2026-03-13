@@ -16,7 +16,7 @@ struct AppointmentSummaryView: View {
     
     @State private var isEditingPatient = false
     @State private var isEditingDateTime = false
-    @State private var showConfirmed = false
+    @State private var showPayment = false
     
     // Editing temps
     @State private var tempDate = Date()
@@ -32,6 +32,9 @@ struct AppointmentSummaryView: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
+                    // MARK: - Top Status
+                    SummaryTopBanner(date: formattedDate, time: selectedTime)
+
                     
                     // MARK: - Doctor Info Card
                     SummaryCard(title: "Doctor", icon: "stethoscope") {
@@ -108,37 +111,38 @@ struct AppointmentSummaryView: View {
                             .font(.system(size: 14))
                             .lineLimit(3...6)
                             .textFieldStyle(.plain)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     
                     // MARK: - Fee Breakdown
                     SummaryCard(title: "Fee Summary", icon: "creditcard.fill") {
-                        VStack(spacing: 12) {
-                            HStack {
-                                Text("Consultation Fee")
-                                    .font(.system(size: 14))
+                        VStack(spacing: 14) {
+                            FeeLineRow(label: "Consultation Fee", value: formattedConsultationFee)
+
+                            FeeLineRow(label: "Service Charge", value: formattedServiceCharge)
+
+                            HStack(spacing: 8) {
+                                Image(systemName: "info.circle")
+                                    .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(.secondary)
-                                Spacer()
-                                Text(doctor.consultationFee)
-                                    .font(.system(size: 14, weight: .medium))
-                            }
-                            
-                            HStack {
-                                Text("Service Charge")
-                                    .font(.system(size: 14))
+
+                                Text("Includes booking support and digital confirmation")
+                                    .font(.system(size: 12))
                                     .foregroundColor(.secondary)
-                                Spacer()
-                                Text("LKR 200")
-                                    .font(.system(size: 14, weight: .medium))
                             }
-                            
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
                             Divider()
-                            
+
                             HStack {
                                 Text("Total")
                                     .font(.system(size: 16, weight: .semibold))
                                 Spacer()
                                 Text(totalFee)
-                                    .font(.system(size: 16, weight: .bold))
+                                    .font(.system(size: 18, weight: .bold))
                                     .foregroundColor(Color(hex: "16A34A"))
                             }
                         }
@@ -176,21 +180,27 @@ struct AppointmentSummaryView: View {
                             .clipShape(Circle())
                     }
                     
-                    // Confirm Button
+                    // Payment Button
                     Button(action: {
-                        hapticsManager.playConfirmSound()
-                        showConfirmed = true
+                        hapticsManager.playTapSound()
+                        showPayment = true
                     }) {
                         HStack(spacing: 8) {
-                            Image(systemName: "checkmark.circle.fill")
+                            Image(systemName: "creditcard.fill")
                                 .font(.system(size: 18))
-                            Text("Confirm Appointment")
+                            Text("Proceed to Payment")
                                 .font(.system(size: 17, weight: .semibold))
                         }
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 54)
-                        .background(Color(hex: "16A34A"))
+                        .background(
+                            LinearGradient(
+                                colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .clipShape(Capsule())
                         .shadow(color: Color(hex: "16A34A").opacity(0.35), radius: 10, x: 0, y: 4)
                     }
@@ -231,28 +241,131 @@ struct AppointmentSummaryView: View {
                 )
                 .presentationDetents([.medium])
             }
-            .fullScreenCover(isPresented: $showConfirmed) {
-                AppointmentConfirmedView(
+            .fullScreenCover(isPresented: $showPayment) {
+                PaymentSelectionView(
+                    totalAmount: totalFee,
                     doctor: doctor,
                     date: formattedDate,
                     time: selectedTime,
                     patientName: patientName,
                     onAppointmentBooked: onAppointmentBooked
                 )
+                .environmentObject(hapticsManager)
             }
         }
     }
     
+    private var consultationAmount: Int {
+        let digits = doctor.consultationFee.filter { $0.isNumber }
+        let parsed = Int(digits) ?? 0
+        return parsed > 0 ? parsed : 2500
+    }
+
+    private var serviceChargeAmount: Int {
+        let percentageCharge = Int((Double(consultationAmount) * 0.18).rounded())
+        let roundedToNearest50 = ((percentageCharge + 25) / 50) * 50
+        return max(600, roundedToNearest50)
+    }
+
+    private var formattedConsultationFee: String {
+        formatLKR(consultationAmount)
+    }
+
+    private var formattedServiceCharge: String {
+        formatLKR(serviceChargeAmount)
+    }
+
     private var totalFee: String {
-        let feeString = doctor.consultationFee
-            .replacingOccurrences(of: "LKR ", with: "")
-            .replacingOccurrences(of: ",", with: "")
-        let feeValue = Int(feeString) ?? 0
-        let total = feeValue + 200
+        let total = consultationAmount + serviceChargeAmount
+        return formatLKR(total)
+    }
+
+    private func formatLKR(_ amount: Int) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        let formatted = formatter.string(from: NSNumber(value: total)) ?? "\(total)"
+        let formatted = formatter.string(from: NSNumber(value: amount)) ?? "\(amount)"
         return "LKR \(formatted)"
+    }
+}
+
+// MARK: - Summary Top Banner
+struct SummaryTopBanner: View {
+    let date: String
+    let time: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: "16A34A").opacity(0.14))
+                        .frame(width: 36, height: 36)
+
+                    Image(systemName: "shield.checkered")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(Color(hex: "16A34A"))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Almost done")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.primary)
+
+                    Text("Review everything before payment")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            HStack(spacing: 10) {
+                SummaryPill(icon: "calendar", text: date)
+                SummaryPill(icon: "clock", text: time)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(hex: "16A34A").opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+struct SummaryPill: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Color(hex: "16A34A"))
+            Text(text)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.primary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(Color(.systemBackground))
+        .clipShape(Capsule())
+    }
+}
+
+struct FeeLineRow: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+
+            Spacer()
+
+            Text(value)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.primary)
+        }
     }
 }
 
@@ -297,6 +410,10 @@ struct SummaryCard<Content: View>: View {
         .padding(16)
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.black.opacity(0.03), lineWidth: 1)
+        )
         .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
     }
 }

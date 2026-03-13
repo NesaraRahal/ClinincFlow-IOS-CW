@@ -96,11 +96,7 @@ struct EmptyHomeView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
-            .padding(.bottom, 20)
-            .background(
-                Color(.systemBackground)
-                    .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-            )
+            .padding(.bottom, 12)
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
@@ -184,82 +180,186 @@ struct EmptyHomeView: View {
                         .padding(.top, 8)
                     }
                     
-                    // MARK: - Health Stats Banner
-                    VStack(spacing: 0) {
-                        HStack(spacing: 20) {
-                            HealthStatCard(
-                                icon: "heart.circle.fill",
-                                iconColor: Color(hex: "EF4444"),
-                                value: "24/7",
-                                label: "Available"
-                            )
-                            
-                            HealthStatCard(
-                                icon: "person.3.fill",
-                                iconColor: Color(hex: "3B82F6"),
-                                value: "50+",
-                                label: "Specialists"
-                            )
-                            
-                            HealthStatCard(
-                                icon: "clock.fill",
-                                iconColor: Color(hex: "F59E0B"),
-                                value: "15min",
-                                label: "Avg Wait"
-                            )
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 20)
-                    }
-                    .background(Color(.systemGroupedBackground))
-                    
-                    Spacer()
-                        .frame(height: 8)
-                    
-                    // MARK: - Quick Tips Section
-                    VStack(alignment: .leading, spacing: 16) {
+                    // MARK: - Get Started Checklist
+                    VStack(alignment: .leading, spacing: 14) {
                         HStack {
-                            Image(systemName: "lightbulb.fill")
+                            Image(systemName: "checklist")
                                 .font(.system(size: 16))
-                                .foregroundColor(Color(hex: "F59E0B"))
+                                .foregroundColor(Color(hex: "16A34A"))
                             
-                            Text("Quick Tips")
+                            Text("Before Your First Booking")
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.primary)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 32)
                         
+                        VStack(spacing: 0) {
+                            FirstBookingChecklistRow(
+                                number: "1",
+                                title: profileManager.hasCompletedSetup ? "Profile ready" : "Complete your profile",
+                                subtitle: profileManager.hasCompletedSetup ? "Your details are set for faster bookings" : "Add your details for faster check-in"
+                            )
+                            
+                            Divider()
+                                .padding(.leading, 36)
+                            
+                            FirstBookingChecklistRow(
+                                number: "2",
+                                title: "Choose a service",
+                                subtitle: "OPD, Lab, Pharmacy, Specialist and more"
+                            )
+                            
+                            Divider()
+                                .padding(.leading, 36)
+                            
+                            FirstBookingChecklistRow(
+                                number: "3",
+                                title: "Get token and room",
+                                subtitle: "Track your queue and navigate easily"
+                            )
+                        }
+                        .padding(14)
+                        .background(Color(.systemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 28)
+                    
+                    // MARK: - Explore & Personalise
+                    VStack(alignment: .leading, spacing: 14) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("While you're here…")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundColor(.primary)
+                            
+                            Text("A few things to make your first visit smooth")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
+                        
+                        // Full-width profile banner
+                        Button(action: {
+                            hapticsManager.playTapSound()
+                            showProfileView = true
+                        }) {
+                            HStack(spacing: 16) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack(spacing: 5) {
+                                        Image(systemName: profileManager.hasCompletedSetup ? "checkmark.circle.fill" : "pencil.circle.fill")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(profileManager.hasCompletedSetup ? Color(hex: "16A34A") : Color(hex: "F59E0B"))
+                                        
+                                        Text(profileManager.hasCompletedSetup ? "All good!" : "Quick task")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(profileManager.hasCompletedSetup ? Color(hex: "16A34A") : Color(hex: "F59E0B"))
+                                    }
+                                    
+                                    Text(profileManager.hasCompletedSetup ? "You're all set 👋" : "Set up your profile")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.primary)
+                                    
+                                    Text(profileManager.hasCompletedSetup
+                                         ? "Your details are saved — check-in will be a breeze."
+                                         : "Add your details once for faster check-ins every visit.")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(2)
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: profileManager.hasCompletedSetup ? "person.crop.circle.badge.checkmark" : "person.crop.circle.badge.plus")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(Color(hex: "16A34A").opacity(0.2))
+                            }
+                            .padding(18)
+                            .background(Color(hex: "16A34A").opacity(0.07))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 18)
+                                    .stroke(Color(hex: "16A34A").opacity(0.18), lineWidth: 1)
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(.horizontal, 20)
+                        
+                        // Two compact shortcut tiles
                         HStack(spacing: 12) {
-                            QuickTipCard(
-                                icon: "clock.fill",
-                                iconColor: Color(hex: "3B82F6"),
-                                title: "Quick Check-in",
-                                subtitle: "Walk-in anytime"
-                            ) {
-                                hapticsManager.playTapSound()
-                                showServiceSelection = true
-                            }
-                            
-                            QuickTipCard(
-                                icon: "mappin.circle.fill",
-                                iconColor: Color(hex: "EF4444"),
-                                title: "Indoor Map",
-                                subtitle: "Find your way"
-                            ) {
-                                hapticsManager.playTapSound()
-                                showMapView = true
-                            }
-                            
-                            QuickTipCard(
-                                icon: "person.2.fill",
-                                iconColor: Color(hex: "8B5CF6"),
-                                title: "Family Care",
-                                subtitle: "Book for others"
-                            ) {
+                            Button(action: {
                                 hapticsManager.playTapSound()
                                 showFamilyMembers = true
+                            }) {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color(hex: "7C3AED").opacity(0.12))
+                                            .frame(width: 44, height: 44)
+                                        Image(systemName: "person.2.fill")
+                                            .font(.system(size: 19))
+                                            .foregroundColor(Color(hex: "7C3AED"))
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text("Family")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.primary)
+                                        
+                                        Text("Book for your family too")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.secondary)
+                                            .lineLimit(2)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                                .padding(16)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(hex: "7C3AED").opacity(0.07))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(Color(hex: "7C3AED").opacity(0.18), lineWidth: 1)
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
                             }
+                            .buttonStyle(PlainButtonStyle())
+                            
+                            Button(action: {
+                                hapticsManager.playTapSound()
+                                showMapView = true
+                            }) {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color(hex: "EF4444").opacity(0.12))
+                                            .frame(width: 44, height: 44)
+                                        Image(systemName: "mappin.and.ellipse")
+                                            .font(.system(size: 19))
+                                            .foregroundColor(Color(hex: "EF4444"))
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text("Explore")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.primary)
+                                        
+                                        Text("Navigate the clinic indoors")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.secondary)
+                                            .lineLimit(2)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                                .padding(16)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(hex: "EF4444").opacity(0.07))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(Color(hex: "EF4444").opacity(0.18), lineWidth: 1)
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         .padding(.horizontal, 20)
                     }
@@ -406,50 +506,37 @@ struct EmptyHomeView: View {
     }
 }
 
-// MARK: - Quick Tip Card
-struct QuickTipCard: View {
-    let icon: String
-    let iconColor: Color
+// MARK: - First Booking Checklist Row
+struct FirstBookingChecklistRow: View {
+    let number: String
     let title: String
     let subtitle: String
-    var action: () -> Void
     
     var body: some View {
-        Button(action: action) {
-            VStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(iconColor.opacity(0.15))
-                        .frame(width: 50, height: 50)
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 20))
-                        .foregroundColor(iconColor)
-                }
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color(hex: "16A34A").opacity(0.14))
+                    .frame(width: 24, height: 24)
                 
-                VStack(spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.primary)
-                        .multilineTextAlignment(.center)
-                    
-                    Text(subtitle)
-                        .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                }
+                Text(number)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Color(hex: "16A34A"))
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 18)
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color(.systemGray5), lineWidth: 0.5)
-            )
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.primary)
+                
+                Text(subtitle)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.vertical, 10)
     }
 }
 
@@ -616,43 +703,6 @@ struct ServiceFeatureRow: View {
             .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
         }
         .buttonStyle(PlainButtonStyle())
-    }
-}
-
-// MARK: - Health Stat Card
-struct HealthStatCard: View {
-    let icon: String
-    let iconColor: Color
-    let value: String
-    let label: String
-    
-    var body: some View {
-        VStack(spacing: 10) {
-            ZStack {
-                Circle()
-                    .fill(iconColor.opacity(0.15))
-                    .frame(width: 48, height: 48)
-                
-                Image(systemName: icon)
-                    .font(.system(size: 22))
-                    .foregroundColor(iconColor)
-            }
-            
-            VStack(spacing: 2) {
-                Text(value)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.primary)
-                
-                Text(label)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
     }
 }
 

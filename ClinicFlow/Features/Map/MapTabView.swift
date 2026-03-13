@@ -9,6 +9,7 @@ struct MapTabView: View {
     let initialOriginID: String?
     let initialDestinationID: String?
     @EnvironmentObject var hapticsManager: HapticsManager
+    @EnvironmentObject var notificationManager: NotificationManager
 
     // MARK: Navigation state
     @State private var currentFloor: Int = 0
@@ -22,6 +23,12 @@ struct MapTabView: View {
     @State private var showOriginPicker = false
     @State private var showDestPicker = false
     @State private var routeSheetDetent: PresentationDetent = .height(210)
+    @State private var showNotifications = false
+    @State private var showProfileSwitcher = false
+
+    var unreadNotificationCount: Int {
+        notificationManager.unreadCount
+    }
 
     // Quick department chips (most common destinations)
     private let quickChips: [(String, String, String)] = [
@@ -48,12 +55,84 @@ struct MapTabView: View {
             // ── Floating floor selector (centred at top) ──
             floorSelector
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .padding(.top, 58)
+                .padding(.top, 70)
                 .allowsHitTesting(true)
 
             // ── Bottom route panel ──
             routePanel
                 .transition(.move(edge: .bottom))
+
+            // ── Header overlay ──
+            VStack(spacing: 0) {
+                HStack {
+                    HStack(spacing: 8) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(hex: "16A34A"), Color(hex: "22C55E")],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 36, height: 36)
+
+                            Image(systemName: "cross.fill")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+
+                        Text("ClinicFlow")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.primary)
+                    }
+
+                    Spacer()
+
+                    HStack(spacing: 12) {
+                        Button(action: {
+                            hapticsManager.playTapSound()
+                            showNotifications = true
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(.systemGray6))
+                                    .frame(width: 42, height: 42)
+
+                                Image(systemName: "bell.fill")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.primary)
+                            }
+                            .overlay(alignment: .topTrailing) {
+                                if unreadNotificationCount > 0 {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.red)
+                                            .frame(width: 18, height: 18)
+
+                                        Text("\(unreadNotificationCount)")
+                                            .font(.system(size: 10, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                    .offset(x: 4, y: -4)
+                                }
+                            }
+                        }
+                        .frame(width: 42, height: 42)
+
+                        ActiveProfileButton(size: 42) {
+                            hapticsManager.playTapSound()
+                            showProfileSwitcher = true
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
+                .background(.regularMaterial)
+
+                Spacer()
+            }
         }
         .onAppear { applyInitialNavigation() }
         .sheet(isPresented: $showOriginPicker) {
@@ -61,6 +140,14 @@ struct MapTabView: View {
         }
         .sheet(isPresented: $showDestPicker) {
             LocationPickerView(title: "Destination", selectedRoomID: $destinationID, selectedFloor: $currentFloor)
+        }
+        .sheet(isPresented: $showNotifications) {
+            NotificationView()
+        }
+        .sheet(isPresented: $showProfileSwitcher) {
+            NavigationStack {
+                ProfileSwitcherView()
+            }
         }
     }
 
