@@ -131,7 +131,7 @@ struct MainTabView: View {
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 126)
+                .padding(.bottom, 142)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             
