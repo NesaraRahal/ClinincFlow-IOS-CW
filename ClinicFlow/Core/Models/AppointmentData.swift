@@ -36,7 +36,7 @@ struct AppointmentData {
             room = "\(Int.random(in: 101...110))"
             floor = "1st Floor"
             doctor = (
-                name: ["Dr. Nimal Jayawardena", "Dr. Samanthi Perera", "Dr. Ruwan Silva"].randomElement()!,
+                name: ["Dr. John Carter", "Dr. Peter Adams", "Dr. David Clark"].randomElement()!,
                 role: "General Physician",
                 rating: String(format: "%.1f", Double.random(in: 4.3...4.9))
             )
@@ -47,7 +47,7 @@ struct AppointmentData {
             room = "\(Int.random(in: 201...208))"
             floor = "2nd Floor"
             doctor = (
-                name: ["Mr. John Silva", "Ms. Kamini Perera", "Mr. Tharindu Fernando"].randomElement()!,
+                name: ["Mr. John Harris", "Ms. Emily Scott", "Mr. Ryan Lewis"].randomElement()!,
                 role: "Lab Technician",
                 rating: String(format: "%.1f", Double.random(in: 4.2...4.8))
             )
@@ -58,7 +58,7 @@ struct AppointmentData {
             room = "\(Int.random(in: 001...005))"
             floor = "Ground Floor"
             doctor = (
-                name: ["Mr. Kasun Bandara", "Ms. Dilini Kumari", "Mr. Aravinda Perera"].randomElement()!,
+                name: ["Mr. Peter Allen", "Ms. Grace Hall", "Mr. Daniel Young"].randomElement()!,
                 role: "Pharmacist",
                 rating: String(format: "%.1f", Double.random(in: 4.4...4.9))
             )
@@ -69,7 +69,7 @@ struct AppointmentData {
             room = "\(Int.random(in: 301...306))"
             floor = "3rd Floor"
             doctor = (
-                name: ["Dr. Priya Kumar", "Dr. Mahesh Gunasekera", "Dr. Anushka Dias"].randomElement()!,
+                name: ["Dr. Olivia Brooks", "Dr. Michael Turner", "Dr. Emma Walker"].randomElement()!,
                 role: "Radiologist",
                 rating: String(format: "%.1f", Double.random(in: 4.5...4.9))
             )
@@ -80,7 +80,7 @@ struct AppointmentData {
             room = "\(Int.random(in: 101...104))"
             floor = "1st Floor"
             doctor = (
-                name: ["Dr. Kumari Wickramasinghe", "Dr. Nadeesha Karunaratne"].randomElement()!,
+                name: ["Dr. Sophia King", "Dr. James Wright"].randomElement()!,
                 role: "Immunization Nurse",
                 rating: String(format: "%.1f", Double.random(in: 4.5...4.9))
             )

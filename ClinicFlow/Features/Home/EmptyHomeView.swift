@@ -12,6 +12,7 @@ struct EmptyHomeView: View {
     @State private var showProfileSwitcher = false
     @State private var showProfileSetupPrompt = false
     @State private var showProfileView = false
+    @State private var continueToBookingAfterProfileSave = false
     @State private var showMapView = false
     @State private var showFamilyMembers = false
     @State private var showDoctorDetail = false
@@ -23,6 +24,18 @@ struct EmptyHomeView: View {
     
     var unreadNotificationCount: Int {
         notificationManager.unreadCount
+    }
+
+    private var isProfileComplete: Bool {
+        let p = profileManager.profile
+        return !p.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+               !p.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+               !p.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+               !p.dateOfBirth.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+               !p.gender.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+               !p.bloodType.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+               !p.address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+               !p.emergencyContact.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     var body: some View {
@@ -154,7 +167,11 @@ struct EmptyHomeView: View {
                         // Book Appointment Button
                         Button(action: {
                             hapticsManager.playNavigationSound()
-                            showServiceSelection = true
+                            if isProfileComplete {
+                                showServiceSelection = true
+                            } else {
+                                showProfileSetupPrompt = true
+                            }
                         }) {
                             HStack(spacing: 10) {
                                 Image(systemName: "plus.circle.fill")
@@ -181,49 +198,67 @@ struct EmptyHomeView: View {
                     }
                     
                     // MARK: - Get Started Checklist
-                    VStack(alignment: .leading, spacing: 14) {
-                        HStack {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 8) {
                             Image(systemName: "checklist")
                                 .font(.system(size: 16))
                                 .foregroundColor(Color(hex: "16A34A"))
                             
-                            Text("Before Your First Booking")
+                            Text("Before booking")
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.primary)
+
+                            Spacer()
+
+                            Text("3 steps")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color(hex: "16A34A"))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Color(hex: "16A34A").opacity(0.1))
+                                .clipShape(Capsule())
                         }
+
+                        Text("Quick setup for a smoother first visit")
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
                         
                         VStack(spacing: 0) {
                             FirstBookingChecklistRow(
                                 number: "1",
-                                title: profileManager.hasCompletedSetup ? "Profile ready" : "Complete your profile",
-                                subtitle: profileManager.hasCompletedSetup ? "Your details are set for faster bookings" : "Add your details for faster check-in"
+                                title: isProfileComplete ? "Profile is ready" : "Complete your profile",
+                                subtitle: isProfileComplete ? "Details saved" : "Add remaining details"
                             )
                             
                             Divider()
-                                .padding(.leading, 36)
+                                .padding(.leading, 42)
                             
                             FirstBookingChecklistRow(
                                 number: "2",
                                 title: "Choose a service",
-                                subtitle: "OPD, Lab, Pharmacy, Specialist and more"
+                                subtitle: "OPD, Lab, Pharmacy, Specialist"
                             )
                             
                             Divider()
-                                .padding(.leading, 36)
+                                .padding(.leading, 42)
                             
                             FirstBookingChecklistRow(
                                 number: "3",
-                                title: "Get token and room",
-                                subtitle: "Track your queue and navigate easily"
+                                title: "Confirm and get token",
+                                subtitle: "See room + queue instantly"
                             )
                         }
-                        .padding(14)
+                        .padding(16)
                         .background(Color(.systemBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color(.systemGray5), lineWidth: 1)
+                        )
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 28)
+                    .padding(.top, 24)
                     
                     // MARK: - Explore & Personalise
                     VStack(alignment: .leading, spacing: 14) {
@@ -247,22 +282,22 @@ struct EmptyHomeView: View {
                             HStack(spacing: 16) {
                                 VStack(alignment: .leading, spacing: 6) {
                                     HStack(spacing: 5) {
-                                        Image(systemName: profileManager.hasCompletedSetup ? "checkmark.circle.fill" : "pencil.circle.fill")
+                                        Image(systemName: isProfileComplete ? "checkmark.circle.fill" : "pencil.circle.fill")
                                             .font(.system(size: 12))
-                                            .foregroundColor(profileManager.hasCompletedSetup ? Color(hex: "16A34A") : Color(hex: "F59E0B"))
+                                            .foregroundColor(isProfileComplete ? Color(hex: "16A34A") : Color(hex: "F59E0B"))
                                         
-                                        Text(profileManager.hasCompletedSetup ? "All good!" : "Quick task")
+                                        Text(isProfileComplete ? "All good!" : "Action needed")
                                             .font(.system(size: 12, weight: .semibold))
-                                            .foregroundColor(profileManager.hasCompletedSetup ? Color(hex: "16A34A") : Color(hex: "F59E0B"))
+                                            .foregroundColor(isProfileComplete ? Color(hex: "16A34A") : Color(hex: "F59E0B"))
                                     }
                                     
-                                    Text(profileManager.hasCompletedSetup ? "You're all set 👋" : "Set up your profile")
+                                    Text(isProfileComplete ? "You're all set 👋" : "Complete your profile")
                                         .font(.system(size: 18, weight: .bold))
                                         .foregroundColor(.primary)
                                     
-                                    Text(profileManager.hasCompletedSetup
+                                    Text(isProfileComplete
                                          ? "Your details are saved — check-in will be a breeze."
-                                         : "Add your details once for faster check-ins every visit.")
+                                         : "Some details are missing. Fill them now to continue booking.")
                                         .font(.system(size: 13))
                                         .foregroundColor(.secondary)
                                         .lineLimit(2)
@@ -270,11 +305,12 @@ struct EmptyHomeView: View {
                                 
                                 Spacer()
                                 
-                                Image(systemName: profileManager.hasCompletedSetup ? "person.crop.circle.badge.checkmark" : "person.crop.circle.badge.plus")
+                                Image(systemName: isProfileComplete ? "person.crop.circle.badge.checkmark" : "person.crop.circle.badge.plus")
                                     .font(.system(size: 48))
                                     .foregroundColor(Color(hex: "16A34A").opacity(0.2))
                             }
                             .padding(18)
+                            .frame(minHeight: 132, alignment: .leading)
                             .background(Color(hex: "16A34A").opacity(0.07))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 18)
@@ -315,6 +351,7 @@ struct EmptyHomeView: View {
                                 }
                                 .padding(16)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .frame(height: 144, alignment: .topLeading)
                                 .background(Color(hex: "7C3AED").opacity(0.07))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 18)
@@ -352,6 +389,7 @@ struct EmptyHomeView: View {
                                 }
                                 .padding(16)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .frame(height: 144, alignment: .topLeading)
                                 .background(Color(hex: "EF4444").opacity(0.07))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 18)
@@ -433,17 +471,11 @@ struct EmptyHomeView: View {
         .onAppear {
             let name = profileManager.profile.fullName.isEmpty ? "" : ", \(profileManager.profile.fullName)"
             hapticsManager.speak("Home screen\(name). No active appointments. Tap Book Appointment to schedule a visit.")
-            
-            // Show profile setup prompt if this is first login and profile not completed
-            if !profileManager.hasCompletedSetup {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    showProfileSetupPrompt = true
-                }
-            }
         }
         .alert("Complete Your Profile", isPresented: $showProfileSetupPrompt) {
             Button("Not Now", role: .cancel) { }
             Button("Complete Profile") {
+                continueToBookingAfterProfileSave = true
                 showProfileView = true
             }
         } message: {
@@ -468,9 +500,23 @@ struct EmptyHomeView: View {
                 ProfileSwitcherView()
             }
         }
-        .sheet(isPresented: $showProfileView) {
+        .sheet(isPresented: $showProfileView, onDismiss: {
+            if continueToBookingAfterProfileSave {
+                continueToBookingAfterProfileSave = false
+            }
+        }) {
             NavigationStack {
-                ProfileView()
+                ProfileView(
+                    startInEditMode: continueToBookingAfterProfileSave,
+                    onProfileSaved: {
+                        if continueToBookingAfterProfileSave {
+                            continueToBookingAfterProfileSave = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                showServiceSelection = true
+                            }
+                        }
+                    }
+                )
             }
         }
         .sheet(isPresented: $showMapView) {
@@ -515,12 +561,12 @@ struct FirstBookingChecklistRow: View {
     var body: some View {
         HStack(spacing: 12) {
             ZStack {
-                Circle()
-                    .fill(Color(hex: "16A34A").opacity(0.14))
-                    .frame(width: 24, height: 24)
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(hex: "16A34A").opacity(0.12))
+                    .frame(width: 28, height: 28)
                 
                 Text(number)
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
                     .foregroundColor(Color(hex: "16A34A"))
             }
             
@@ -530,8 +576,9 @@ struct FirstBookingChecklistRow: View {
                     .foregroundColor(.primary)
                 
                 Text(subtitle)
-                    .font(.system(size: 12, weight: .regular))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
             }
             
             Spacer()

@@ -4,14 +4,14 @@ import Combine
 // MARK: - User Profile Model
 struct UserProfile: Codable {
     var fullName: String = "John Doe"
-    var patientID: String = "P-2024-0892"
-    var email: String = "john.doe@example.com"
-    var phone: String = "+94 77 123 4567"
-    var dateOfBirth: String = "1995-06-15"
-    var gender: String = "Male"
-    var bloodType: String = "O+"
-    var address: String = "123 Hospital Street, Colombo"
-    var emergencyContact: String = "Jane Doe (+94 71 987 6543)"
+    var patientID: String = "P-2026-1001"
+    var email: String = ""
+    var phone: String = ""
+    var dateOfBirth: String = ""
+    var gender: String = ""
+    var bloodType: String = ""
+    var address: String = ""
+    var emergencyContact: String = ""
     var allergies: [String] = []
     var chronicConditions: [String] = []
     
@@ -58,6 +58,19 @@ class UserProfileManager: ObservableObject {
             self.profile = decoded
         } else {
             self.profile = UserProfile()
+        }
+
+        // For incomplete profiles, keep only basic identity and clear old demo data
+        if !hasCompletedSetup {
+            profile.email = ""
+            profile.phone = ""
+            profile.dateOfBirth = ""
+            profile.gender = ""
+            profile.bloodType = ""
+            profile.address = ""
+            profile.emergencyContact = ""
+            profile.allergies = []
+            profile.chronicConditions = []
         }
         
         loadProfileImage()

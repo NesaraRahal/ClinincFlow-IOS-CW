@@ -165,11 +165,11 @@ struct ServiceBookingFlow: View {
     
     private func getAssignedStaff() -> String {
         switch serviceTitle {
-        case "Laboratory": return "Lab Technician Sarah"
+        case "Laboratory": return "Lab Technician Emily"
         case "Pharmacy": return "Pharmacist John"
         case "Radiology": return "Radiologist Dr. Smith"
         case "Vaccination": return "Nurse Emily"
-        case "OPD": return "Dr. Ahmed Khan"
+        case "OPD": return "Dr. Peter Thompson"
         default: return "Medical Staff"
         }
     }

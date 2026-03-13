@@ -5,6 +5,9 @@ struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var profileManager: UserProfileManager
     @EnvironmentObject var hapticsManager: HapticsManager
+
+    let startInEditMode: Bool
+    var onProfileSaved: (() -> Void)?
     
     @State private var isEditing = false
     
@@ -21,6 +24,7 @@ struct ProfileView: View {
     @State private var editChronicConditions: [String] = []
     @State private var newAllergyText = ""
     @State private var newConditionText = ""
+    @State private var didAutoFillOnFirstTap = false
     
     // Image picker
     @State private var showImageSourceSheet = false
@@ -30,6 +34,11 @@ struct ProfileView: View {
     
     let genders = ["Male", "Female", "Other"]
     let bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+
+    init(startInEditMode: Bool = false, onProfileSaved: (() -> Void)? = nil) {
+        self.startInEditMode = startInEditMode
+        self.onProfileSaved = onProfileSaved
+    }
     
     var body: some View {
         NavigationStack {
@@ -51,17 +60,6 @@ struct ProfileView: View {
                                 .font(.system(size: 14))
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
-                            
-                            Button(action: startEditing) {
-                                Text("Set Up Profile")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 32)
-                                    .padding(.vertical, 12)
-                                    .background(Color(hex: "16A34A"))
-                                    .clipShape(Capsule())
-                            }
-                            .padding(.top, 4)
                         }
                         .padding(24)
                         .frame(maxWidth: .infinity)
@@ -148,15 +146,6 @@ struct ProfileView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundStyle(.secondary, Color(.systemGray5))
-                    }
-                }
-            }
             .confirmationDialog("Profile Photo", isPresented: $showImageSourceSheet, titleVisibility: .visible) {
                 Button("Take Photo") {
                     showCamera = true
@@ -189,6 +178,11 @@ struct ProfileView: View {
                 }
                 .ignoresSafeArea()
             }
+            .onAppear {
+                if startInEditMode && !isEditing {
+                    startEditing()
+                }
+            }
         }
     }
     
@@ -201,12 +195,12 @@ struct ProfileView: View {
                 .padding(.horizontal, 4)
             
             VStack(spacing: 16) {
-                EditableField(icon: "person.fill", label: "Full Name", text: $editName)
-                EditableField(icon: "envelope.fill", label: "Email", text: $editEmail, keyboard: .emailAddress)
-                EditableField(icon: "phone.fill", label: "Phone", text: $editPhone, keyboard: .phonePad)
-                EditableField(icon: "birthday.cake.fill", label: "Date of Birth", text: $editDOB)
-                EditableField(icon: "mappin.circle.fill", label: "Address", text: $editAddress)
-                EditableField(icon: "phone.badge.waveform.fill", label: "Emergency Contact", text: $editEmergencyContact)
+                EditableField(icon: "person.fill", label: "Full Name", text: $editName, onTap: autoFillAllProfileFieldsOnce)
+                EditableField(icon: "envelope.fill", label: "Email", text: $editEmail, keyboard: .emailAddress, onTap: autoFillAllProfileFieldsOnce)
+                EditableField(icon: "phone.fill", label: "Phone", text: $editPhone, keyboard: .phonePad, onTap: autoFillAllProfileFieldsOnce)
+                EditableField(icon: "birthday.cake.fill", label: "Date of Birth", text: $editDOB, onTap: autoFillAllProfileFieldsOnce)
+                EditableField(icon: "mappin.circle.fill", label: "Address", text: $editAddress, onTap: autoFillAllProfileFieldsOnce)
+                EditableField(icon: "phone.badge.waveform.fill", label: "Emergency Contact", text: $editEmergencyContact, onTap: autoFillAllProfileFieldsOnce)
                 
                 // Gender Picker
                 VStack(alignment: .leading, spacing: 8) {
@@ -431,6 +425,7 @@ struct ProfileView: View {
         editChronicConditions = p.chronicConditions
         newAllergyText = ""
         newConditionText = ""
+        didAutoFillOnFirstTap = false
         withAnimation(.easeInOut(duration: 0.25)) {
             isEditing = true
         }
@@ -452,6 +447,27 @@ struct ProfileView: View {
         withAnimation(.easeInOut(duration: 0.25)) {
             isEditing = false
         }
+
+        onProfileSaved?()
+        if startInEditMode {
+            dismiss()
+        }
+    }
+
+    private func autoFillAllProfileFieldsOnce() {
+        guard !didAutoFillOnFirstTap else { return }
+        didAutoFillOnFirstTap = true
+
+        editName = "John Doe"
+        editEmail = "john.doe@example.com"
+        editPhone = "+94 77 123 4567"
+        editDOB = "1995-06-15"
+        editGender = "Male"
+        editBloodType = "O+"
+        editAddress = "123 Hospital Street, Colombo"
+        editEmergencyContact = "Jane Doe (+94 71 987 6543)"
+        editAllergies = ["Penicillin"]
+        editChronicConditions = ["Hypertension"]
     }
     
     private func cancelEditing() {
@@ -468,6 +484,7 @@ struct EditableField: View {
     let label: String
     @Binding var text: String
     var keyboard: UIKeyboardType = .default
+    var onTap: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -486,6 +503,9 @@ struct EditableField: View {
                 .padding(12)
                 .background(Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
+                .onTapGesture {
+                    onTap?()
+                }
         }
     }
 }

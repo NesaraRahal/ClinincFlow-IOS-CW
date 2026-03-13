@@ -86,11 +86,11 @@ The service booking flow provides a comprehensive multi-step booking experience 
 
 | Service | Assigned Staff | Role | Room |
 |---------|---------------|------|------|
-| Laboratory | Lab Technician Sarah | Senior Lab Technician | 201 |
+| Laboratory | Lab Technician Emily | Senior Lab Technician | 201 |
 | Pharmacy | Pharmacist John | Chief Pharmacist | G-05 |
 | Radiology | Radiologist Dr. Smith | Radiologist | B-12 |
 | Vaccination | Nurse Emily | Vaccination Nurse | 203 |
-| OPD | Dr. Ahmed Khan | General Physician | 305 |
+| OPD | Dr. Peter Thompson | General Physician | 305 |
 
 ## User Experience Flow
 

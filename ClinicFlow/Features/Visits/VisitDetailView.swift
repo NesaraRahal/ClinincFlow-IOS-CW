@@ -13,7 +13,6 @@ struct VisitDetailView: View {
     @EnvironmentObject var hapticsManager: HapticsManager
     @Environment(\.dismiss) private var dismiss
     @State private var showCancelConfirmation = false
-    @State private var showAddReferral = false
     @State private var animateProgress = false
     
     private var visit: Visit? {
@@ -43,7 +42,7 @@ struct VisitDetailView: View {
                             bookingInfoCard(visit)
                             
                             if visit.status == .active {
-                                actionButtons(visit)
+                                actionButtons()
                             }
                             
                             Spacer().frame(height: 20)
@@ -84,11 +83,6 @@ struct VisitDetailView: View {
                 }
             } message: {
                 Text("Are you sure you want to cancel this visit? This action cannot be undone.")
-            }
-            .sheet(isPresented: $showAddReferral) {
-                if let visit = visit {
-                    AddReferralStepView(visitID: visit.id)
-                }
             }
             .onAppear {
                 withAnimation(.easeOut(duration: 0.8).delay(0.3)) {
@@ -371,55 +365,8 @@ struct VisitDetailView: View {
     }
     
     // MARK: - Action Buttons
-    private func actionButtons(_ visit: Visit) -> some View {
+    private func actionButtons() -> some View {
         VStack(spacing: 12) {
-            // Advance to Next Step
-            Button {
-                hapticsManager.playConfirmSound()
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                    let result = visitsManager.advanceStep(for: visit.id)
-                    if result == nil {
-                        // Visit completed — dismiss after a moment
-                        hapticsManager.playSuccessSound()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            dismiss()
-                        }
-                    }
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "arrow.right.circle.fill")
-                        .font(.system(size: 16))
-                    
-                    let nextLabel = nextStepLabel(for: visit)
-                    Text(nextLabel)
-                        .font(.system(size: 15, weight: .semibold))
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(Color(hex: "16A34A"))
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            
-            // Add Doctor Referral
-            Button {
-                hapticsManager.playTapSound()
-                showAddReferral = true
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "plus.circle")
-                        .font(.system(size: 16))
-                    Text("Add Doctor Referral Step")
-                        .font(.system(size: 15, weight: .semibold))
-                }
-                .foregroundColor(Color(hex: "16A34A"))
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(Color(hex: "16A34A").opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            
             // Cancel Visit
             Button {
                 hapticsManager.playTapSound()
@@ -451,17 +398,6 @@ struct VisitDetailView: View {
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.primary)
         }
-    }
-    
-    private func nextStepLabel(for visit: Visit) -> String {
-        guard let currentIdx = visit.steps.firstIndex(where: { $0.isCurrent }) else {
-            return "Complete Visit"
-        }
-        let nextIdx = currentIdx + 1
-        if nextIdx < visit.steps.count {
-            return "Advance to: \(visit.steps[nextIdx].label)"
-        }
-        return "Complete Visit"
     }
 }
 

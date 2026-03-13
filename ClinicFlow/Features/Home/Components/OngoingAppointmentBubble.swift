@@ -206,7 +206,7 @@ private struct CompactMetricChip: View {
         appointment: AppointmentData(
             tokenNumber: "S24",
             department: "Specialist Clinic",
-            doctorName: "Dr. Sarah Ahmed",
+            doctorName: "Dr. Sarah Johnson",
             doctorRole: "Cardiologist",
             doctorRating: "4.8",
             roomNumber: "312",

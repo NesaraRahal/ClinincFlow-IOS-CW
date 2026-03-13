@@ -42,7 +42,7 @@ struct DoctorDetailView: View {
     @EnvironmentObject var hapticsManager: HapticsManager
     
     // Sample data
-    let doctorName = "Dr. Sarah Ahmed"
+    let doctorName = "Dr. Sarah Johnson"
     let specialization = "General Physician"
     let qualification = "MBBS, MD"
     let opdStatus: OPDStatus = .ongoing

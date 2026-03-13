@@ -17,14 +17,14 @@ struct SpecialistDoctor: Identifiable {
 
 // Sample data
 let sampleDoctors: [SpecialistDoctor] = [
-    SpecialistDoctor(name: "Dr. Sarah Ahmed", specialty: "Cardiologist", qualification: "MBBS, MD, FACC", rating: 4.8, reviewCount: 234, experience: 12, consultationFee: "Rs. 3,500", imageName: "doctor_sarah", isAvailable: true, nextAvailable: "Today"),
-    SpecialistDoctor(name: "Dr. Rajiv Perera", specialty: "Neurologist", qualification: "MBBS, MD", rating: 4.9, reviewCount: 189, experience: 15, consultationFee: "Rs. 4,000", imageName: "doctor_rajiv", isAvailable: true, nextAvailable: "Today"),
-    SpecialistDoctor(name: "Dr. Nisha Fernando", specialty: "Dermatologist", qualification: "MBBS, MD, DDV", rating: 4.7, reviewCount: 312, experience: 8, consultationFee: "Rs. 2,500", imageName: "doctor_nisha", isAvailable: false, nextAvailable: "Tomorrow"),
-    SpecialistDoctor(name: "Dr. Amal Jayasinghe", specialty: "Orthopedic Surgeon", qualification: "MBBS, MS Ortho", rating: 4.6, reviewCount: 156, experience: 20, consultationFee: "Rs. 3,000", imageName: "doctor_amal", isAvailable: true, nextAvailable: "Today"),
-    SpecialistDoctor(name: "Dr. Priya Kumar", specialty: "ENT Specialist", qualification: "MBBS, MS ENT", rating: 4.5, reviewCount: 98, experience: 10, consultationFee: "Rs. 2,800", imageName: "doctor_priya", isAvailable: true, nextAvailable: "Today"),
-    SpecialistDoctor(name: "Dr. Kamal Dias", specialty: "Cardiologist", qualification: "MBBS, MD, DM", rating: 4.8, reviewCount: 278, experience: 18, consultationFee: "Rs. 4,500", imageName: "doctor_kamal", isAvailable: false, nextAvailable: "Feb 27"),
-    SpecialistDoctor(name: "Dr. Meena Sharma", specialty: "Gynecologist", qualification: "MBBS, MS OBG", rating: 4.9, reviewCount: 421, experience: 14, consultationFee: "Rs. 3,000", imageName: "doctor_meena", isAvailable: true, nextAvailable: "Today"),
-    SpecialistDoctor(name: "Dr. Dinesh Silva", specialty: "Neurologist", qualification: "MBBS, DM Neuro", rating: 4.4, reviewCount: 87, experience: 6, consultationFee: "Rs. 2,500", imageName: "doctor_dinesh", isAvailable: true, nextAvailable: "Today")
+    SpecialistDoctor(name: "Dr. Sarah Johnson", specialty: "Cardiologist", qualification: "MBBS, MD, FACC", rating: 4.8, reviewCount: 234, experience: 12, consultationFee: "Rs. 3,500", imageName: "doctor_sarah", isAvailable: true, nextAvailable: "Today"),
+    SpecialistDoctor(name: "Dr. Peter Williams", specialty: "Neurologist", qualification: "MBBS, MD", rating: 4.9, reviewCount: 189, experience: 15, consultationFee: "Rs. 4,000", imageName: "doctor_rajiv", isAvailable: true, nextAvailable: "Today"),
+    SpecialistDoctor(name: "Dr. Emily Brown", specialty: "Dermatologist", qualification: "MBBS, MD, DDV", rating: 4.7, reviewCount: 312, experience: 8, consultationFee: "Rs. 2,500", imageName: "doctor_nisha", isAvailable: false, nextAvailable: "Tomorrow"),
+    SpecialistDoctor(name: "Dr. John Miller", specialty: "Orthopedic Surgeon", qualification: "MBBS, MS Ortho", rating: 4.6, reviewCount: 156, experience: 20, consultationFee: "Rs. 3,000", imageName: "doctor_amal", isAvailable: true, nextAvailable: "Today"),
+    SpecialistDoctor(name: "Dr. Olivia Davis", specialty: "ENT Specialist", qualification: "MBBS, MS ENT", rating: 4.5, reviewCount: 98, experience: 10, consultationFee: "Rs. 2,800", imageName: "doctor_priya", isAvailable: true, nextAvailable: "Today"),
+    SpecialistDoctor(name: "Dr. Michael Wilson", specialty: "Cardiologist", qualification: "MBBS, MD, DM", rating: 4.8, reviewCount: 278, experience: 18, consultationFee: "Rs. 4,500", imageName: "doctor_kamal", isAvailable: false, nextAvailable: "Feb 27"),
+    SpecialistDoctor(name: "Dr. Emma Taylor", specialty: "Gynecologist", qualification: "MBBS, MS OBG", rating: 4.9, reviewCount: 421, experience: 14, consultationFee: "Rs. 3,000", imageName: "doctor_meena", isAvailable: true, nextAvailable: "Today"),
+    SpecialistDoctor(name: "Dr. Daniel Moore", specialty: "Neurologist", qualification: "MBBS, DM Neuro", rating: 4.4, reviewCount: 87, experience: 6, consultationFee: "Rs. 2,500", imageName: "doctor_dinesh", isAvailable: true, nextAvailable: "Today")
 ]
 
 let specialties = ["All", "Cardiologist", "Neurologist", "Dermatologist", "Orthopedic Surgeon", "ENT Specialist", "Gynecologist"]
